@@ -17,6 +17,10 @@
         "snare": {
             "name": "Snare",
             "short": "SNR"
+        },
+        "ride": {
+            "name": "Ride",
+            "short": "RDE"
         }
     }
 }
