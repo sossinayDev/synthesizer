@@ -2,6 +2,9 @@
     "name": "Basic kit",
     "description": "A basic drum kit",
     "samples": [
-        
+        "hit",
+        "hat",
+        "kick",
+        "snare"
     ]
 }
