@@ -1,10 +1,22 @@
 {
     "name": "Basic kit",
     "description": "A basic drum kit",
-    "samples": [
-        "hit",
-        "hat",
-        "kick",
-        "snare"
-    ]
+    "samples": {
+        "hit": {
+            "name": "Hit",
+            "short": "HIT"
+        },
+        "hat": {
+            "name": "Hat",
+            "short": "HAT"
+        },
+        "kick": {
+            "name": "Kick",
+            "short": "KCK"
+        },
+        "snare": {
+            "name": "Snare",
+            "short": "SNR"
+        }
+    }
 }
