@@ -4,6 +4,7 @@
         "inactive": "#001133",
         "background": "#000000",
         "panels": "#050505",
-        "buttons": "#202040"
+        "buttons": "#202040",
+        "col_increase": 50
     }
 }

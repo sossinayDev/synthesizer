@@ -6,6 +6,7 @@
 ## 07.05.2025
 - main.py: 
     - Styling-Änderungen: Instrumente haben nun eigene Farben
+    - Styling-Änderungen: Der aktuell abgespielte Schlag wird etwas heller
     - Playback-Einstellungen: Das Pattern kann nun abgespielt, pausiert und gestoppt werden
-    - Playback-Geschwindigkeit: Die Geschwindigkeit des Patterns kann geändert werden.
+    - Playback-Geschwindigkeit: Die Geschwindigkeit des Patterns kann geändert werden. (Limit: 500 BPM)
 - Samples: Neuer Snare sample hinzugefügt

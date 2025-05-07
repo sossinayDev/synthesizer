@@ -16,6 +16,7 @@ inactive = "#001133"
 background = "#000000"
 panels= "#333333"
 buttons= "#aaaaaa"
+col_increase = 50
 
 current_kit_name = ""
 
@@ -23,13 +24,14 @@ instruments = []
 pattern = []
 
 def load_settings():
-    global settings, active, inactive, background, panels, buttons
+    global settings, active, inactive, background, panels, buttons, col_increase
     settings = json.load(open("user/settings.json"))
     active=settings["theme"]["active"]
     inactive=settings["theme"]["inactive"]
     background=settings["theme"]["background"]
     panels=settings["theme"]["panels"]
     buttons=settings["theme"]["buttons"]
+    col_increase=settings["theme"]["col_increase"]
 load_settings()
 
 
@@ -85,9 +87,9 @@ def on_button_click(button):
     else:
         button.config(bg=instru_inac)
     
-
+highligted_col = 0
 def apply_pattern(pattern_data):
-    global pattern, instruments
+    global pattern, instruments, col_increase
     pattern = pattern_data
     for column in range(len(pattern)):
         for row in range(len(pattern[column])):
@@ -95,10 +97,27 @@ def apply_pattern(pattern_data):
             instrument_data = instruments[list(instruments.keys())[row]]
             instru_inac = instrument_data["inactive"]
             instru_ac = instrument_data["active"]
+            if highligted_col == column:
+                instru_ac = f"#{min(int(instru_ac[1:3], 16) + col_increase, 255):02x}{min(int(instru_ac[3:5], 16) + col_increase, 255):02x}{min(int(instru_ac[5:7], 16) + col_increase, 255):02x}"
             if pattern[column][row]["enabled"]:
                 button.config(bg=instru_ac)
             else:
                 button.config(bg=instru_inac)
+
+def apply_single_pattern_col(pattern_data, column):
+    global pattern, instruments, col_increase
+    pattern = pattern_data
+    for row in range(len(pattern[column])):
+        button = top_frame.grid_slaves(row=row, column=column+1)[0]
+        instrument_data = instruments[list(instruments.keys())[row]]
+        instru_inac = instrument_data["inactive"]
+        instru_ac = instrument_data["active"]
+        if highligted_col == column:
+            instru_ac = f"#{min(int(instru_ac[1:3], 16) + col_increase, 255):02x}{min(int(instru_ac[3:5], 16) + col_increase, 255):02x}{min(int(instru_ac[5:7], 16) + col_increase, 255):02x}"
+        if pattern[column][row]["enabled"]:
+            button.config(bg=instru_ac)
+        else:
+            button.config(bg=instru_inac)
 
             
 def save_pattern(filename):
@@ -282,6 +301,10 @@ def update_playback_menu():
         global bpm
         try:
             bpm = int(bpm_entry.get())
+            if bpm < 10:
+                bpm = 10
+            if bpm > 500:
+                bpm = 500
             print(f"BPM updated to {bpm}")
         except ValueError:
             bpm_entry.delete(0, tk.END)
@@ -308,7 +331,7 @@ bpm = 80
 current_hit = 0
 
 def tick():
-    global bpm, current_hit
+    global bpm, current_hit, pattern, highligted_col
     if playing:
         print("tick")
         samples = []
@@ -323,6 +346,14 @@ def tick():
         
         for sample in samples:
             pygame.mixer.Sound(sample).play()
+        
+        highligted_col = current_hit
+        apply_single_pattern_col(pattern, current_hit)
+        if current_hit > 0:
+            apply_single_pattern_col(pattern, current_hit-1)
+        else:
+            apply_single_pattern_col(pattern, 15)
+            
         
         current_hit += 1
         if current_hit > 15:
