@@ -66,8 +66,8 @@ def on_button_click(button):
         row = (button_id-1) // cols
         col = (button_id-1) % cols
     print(col, row)
-    pattern[col][row] = not pattern[col][row]
-    if pattern[col][row]:
+    pattern[col][row]["enabled"] = not pattern[col][row]["enabled"]
+    if pattern[col][row]["enabled"]:
         button.config(bg=active)
     else:
         button.config(bg=inactive)
@@ -79,7 +79,7 @@ def apply_pattern(pattern_data):
     for column in range(len(pattern)):
         for row in range(len(pattern[column])):
             button = top_frame.grid_slaves(row=row, column=column+1)[0]
-            if pattern[column][row]:
+            if pattern[column][row]["enabled"]:
                 button.config(bg=active)
             else:
                 button.config(bg=inactive)
@@ -149,7 +149,9 @@ def load_kit(kit_name):
     for e in range(16):
         column = []
         for e in range(len(instruments)):
-            column.append(False)
+            column.append({
+                "enabled": False
+            })
         pattern.append(column)
     
     root.configure(bg="black")
