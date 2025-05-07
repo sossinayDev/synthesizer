@@ -3,4 +3,5 @@ A synthesizer.
 
 ## Needed libraries
 - tkinter
-- playsound
+- pillow
+- pygame

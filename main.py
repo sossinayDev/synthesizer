@@ -249,7 +249,7 @@ def update_file_menu():
 play_button = None
 
 def update_playback_menu():
-    global bottom_middle_frame, play_button
+    global bottom_middle_frame, play_button, bpm
     clear_screen(bottom_middle_frame)
     playback_area = tk.LabelFrame(bottom_middle_frame, text="Playback", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     playback_area.pack(fill="x", padx=10, pady=5)
@@ -269,6 +269,26 @@ def update_playback_menu():
     stop_button.image = stop_image  # Keep a reference to avoid garbage collection
 
     play_button.pack(side="left", padx=5, pady=5)  # Adjust play button to align on the left
+    
+    # Add BPM section
+    bpm_frame = tk.LabelFrame(bottom_middle_frame, text="BPM", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    bpm_frame.pack(fill="x", padx=10, pady=5)
+
+    bpm_entry = tk.Entry(bpm_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
+    bpm_entry.insert(0, str(bpm))
+    bpm_entry.pack(fill="x", padx=5, pady=5, ipady=5)
+
+    def update_bpm():
+        global bpm
+        try:
+            bpm = int(bpm_entry.get())
+            print(f"BPM updated to {bpm}")
+        except ValueError:
+            bpm_entry.delete(0, tk.END)
+            bpm_entry.insert(0, str(bpm))
+
+    update_bpm_button = tk.Button(bpm_frame, text="Update BPM", bg=buttons, border=0, fg="white", font=silkscreen, command=update_bpm)
+    update_bpm_button.pack(fill="x", padx=10, pady=5)
     
 playing = False
 
@@ -317,6 +337,9 @@ def stop_pattern():
     global playing, current_hit
     playing = False
     current_hit = 0
+    play_image = ImageTk.PhotoImage(file="img/play.png")
+    play_button.config(image=play_image, compound="center")
+    play_button.image = play_image  # Keep a reference to avoid garbage collection
     pygame.mixer.stop()
     
 
