@@ -45,11 +45,16 @@ def fill_buttons(frame, rows, cols, on_button_click):
 
     for row in range(rows):
         for col in range(cols + 1):
+            instrument_data = instruments[list(instruments.keys())[row]]
+            
+            instru_inac = instrument_data["inactive"]
+            instru_ac = instrument_data["active"]
+            
             if col == 0:
-                label = tk.Label(frame, text=f"{instruments[list(instruments.keys())[row]]['short']}", bg=background, fg="white", font=silkscreen)
+                label = tk.Label(frame, text=f"{instrument_data['short']}", bg=background, fg="white", font=silkscreen)
                 label.grid(row=row, column=col, padx=5, pady=2, sticky="nsew", columnspan=1)
             else:
-                button = tk.Button(frame, text="", bg=inactive, fg="white", border=0, relief="flat", highlightthickness=0)
+                button = tk.Button(frame, text="", bg=instru_inac, fg="white", border=0, relief="flat", highlightthickness=0)
                 button.grid(row=row, column=col, padx=1, pady=1, sticky="nsew")
                 button.config(command=lambda b=button: on_button_click(b))
     # Adjust the frame's padding to ensure all buttons fit within the visible area
@@ -66,23 +71,31 @@ def on_button_click(button):
         row = (button_id-1) // cols
         col = (button_id-1) % cols
     print(col, row)
+    
+    instrument_data = instruments[list(instruments.keys())[row]]
+    instru_inac = instrument_data["inactive"]
+    instru_ac = instrument_data["active"]
+    
     pattern[col][row]["enabled"] = not pattern[col][row]["enabled"]
     if pattern[col][row]["enabled"]:
-        button.config(bg=active)
+        button.config(bg=instru_ac)
     else:
-        button.config(bg=inactive)
+        button.config(bg=instru_inac)
     
 
 def apply_pattern(pattern_data):
-    global pattern
+    global pattern, instruments
     pattern = pattern_data
     for column in range(len(pattern)):
         for row in range(len(pattern[column])):
             button = top_frame.grid_slaves(row=row, column=column+1)[0]
+            instrument_data = instruments[list(instruments.keys())[row]]
+            instru_inac = instrument_data["inactive"]
+            instru_ac = instrument_data["active"]
             if pattern[column][row]["enabled"]:
-                button.config(bg=active)
+                button.config(bg=instru_ac)
             else:
-                button.config(bg=inactive)
+                button.config(bg=instru_inac)
 
             
 def save_pattern(filename):

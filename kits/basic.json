@@ -4,23 +4,33 @@
     "samples": {
         "hit": {
             "name": "Hit",
-            "short": "HIT"
+            "short": "HIT",
+            "inactive": "#332200",
+            "active": "#dd9900"
         },
         "hat": {
             "name": "Hat",
-            "short": "HAT"
+            "short": "HAT",
+            "inactive": "#333300",
+            "active": "#dddd00"
         },
         "kick": {
             "name": "Kick",
-            "short": "KCK"
+            "short": "KCK",
+            "inactive": "#223300",
+            "active": "#99dd00"
         },
         "snare": {
             "name": "Snare",
-            "short": "SNR"
+            "short": "SNR",
+            "inactive": "#003322",
+            "active": "#00dd99"
         },
         "ride": {
             "name": "Ride",
-            "short": "RDE"
+            "short": "RDE",
+            "inactive": "#002233",
+            "active": "#0099dd"
         }
     }
 }
