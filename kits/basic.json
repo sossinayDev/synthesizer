@@ -6,31 +6,36 @@
             "name": "Hit",
             "short": "HIT",
             "inactive": "#332200",
-            "active": "#dd9900"
+            "active": "#dd9900",
+            "file": "hit.wav"
         },
         "hat": {
             "name": "Hat",
             "short": "HAT",
             "inactive": "#333300",
-            "active": "#dddd00"
+            "active": "#dddd00",
+            "file": "hat.wav"
         },
         "kick": {
             "name": "Kick",
             "short": "KCK",
             "inactive": "#223300",
-            "active": "#99dd00"
+            "active": "#99dd00",
+            "file": "kick.wav"
         },
         "snare": {
             "name": "Snare",
             "short": "SNR",
             "inactive": "#003322",
-            "active": "#00dd99"
+            "active": "#00dd99",
+            "file": "snare.wav"
         },
         "ride": {
             "name": "Ride",
             "short": "RDE",
             "inactive": "#002233",
-            "active": "#0099dd"
+            "active": "#0099dd",
+            "file": "ride.wav"
         }
     }
 }

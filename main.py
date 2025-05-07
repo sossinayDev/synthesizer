@@ -3,6 +3,9 @@ import tkinter as tk
 from tkinter import font
 import json
 from PIL import ImageFont, ImageTk
+import pygame
+
+pygame.mixer.init()
 
 silkscreen = None
 
@@ -145,6 +148,8 @@ def load_kit(kit_name):
     # Bottom middle section
     bottom_middle_frame = tk.Frame(root, bg=panels)
     bottom_middle_frame.grid(row=1, column=1, sticky="nsew")
+    
+    update_playback_menu()
 
     # Bottom right section
     bottom_right_frame = tk.Frame(root, bg=panels)
@@ -206,8 +211,11 @@ def update_file_menu():
     # Add dropdown for stored patterns
     pattern_names = [file.replace(".json", "").capitalize() for file in os.listdir("patterns")]
     patterns_available = bool(pattern_names)
-    pattern_var = tk.StringVar(value=pattern_var.get() if pattern_var else (pattern_names[0] if patterns_available else "No patterns available"))
-    pattern_dropdown = tk.OptionMenu(file_frame, pattern_var, *pattern_names)
+    pattern_var = tk.StringVar(value=pattern_var.get() if pattern_var in pattern_names else (pattern_names[0] if patterns_available else "No patterns available"))
+    if pattern_var.get() == "No patterns available":
+        pattern_dropdown = tk.OptionMenu(file_frame, pattern_var, *pattern_names, value=pattern_var.get())
+    else:
+        pattern_dropdown = tk.OptionMenu(file_frame, pattern_var, *pattern_names)
     pattern_dropdown.config(bg=buttons, fg="white", border=0, borderwidth=0, activebackground=buttons, font=silkscreen, activeforeground="white", highlightbackground=buttons)
     menu = pattern_dropdown["menu"]
     menu.config(bg=buttons, fg="white", border=0, activebackground=buttons, activeforeground="white")
@@ -238,7 +246,82 @@ def update_file_menu():
     load_button = tk.Button(kit_frame, text="Load", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: load_kit(kit_var.get()))
     load_button.pack(fill="x", padx=10, pady=5)
 
+play_button = None
 
+def update_playback_menu():
+    global bottom_middle_frame, play_button
+    clear_screen(bottom_middle_frame)
+    playback_area = tk.LabelFrame(bottom_middle_frame, text="Playback", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    playback_area.pack(fill="x", padx=10, pady=5)
+    
+    play_image = ImageTk.PhotoImage(file="img/play.png")
+    play_button = tk.Button(playback_area, image=play_image, border=0, bg=buttons, command=lambda: play_pause_pattern())
+    play_button.image = play_image  # Keep a reference to avoid garbage collection
+    play_button.pack(padx=10, pady=5)
+    play_button.config(width=40, height=40)
+    play_button.image = play_image  # Keep a reference to avoid garbage collection
+    
+    stop_image = ImageTk.PhotoImage(file="img/stop.png")
+    stop_button = tk.Button(playback_area, image=stop_image, border=0, bg=buttons, command=lambda: stop_pattern())
+    stop_button.image = stop_image  # Keep a reference to avoid garbage collection
+    stop_button.pack(side="left", padx=5, pady=5)
+    stop_button.config(width=40, height=40)
+    stop_button.image = stop_image  # Keep a reference to avoid garbage collection
+
+    play_button.pack(side="left", padx=5, pady=5)  # Adjust play button to align on the left
+    
+playing = False
+
+def play_pause_pattern():
+    global play_button, playing
+    playing = not playing
+    if playing:
+        play_image = ImageTk.PhotoImage(file="img/pause.png")
+        tick()
+    else:
+        play_image = ImageTk.PhotoImage(file="img/play.png")
+        
+    play_button.config(image=play_image, compound="center")
+    play_button.image = play_image  # Keep a reference to avoid garbage collection
+
+bpm = 80
+current_hit = 0
+
+def tick():
+    global bpm, current_hit
+    if playing:
+        print("tick")
+        samples = []
+        i = 0
+        for instr in pattern[current_hit]:
+            if instr["enabled"]:
+                i_data = instruments[list(instruments.keys())[i]]
+                samples.append("samples/"+i_data["file"])
+            i += 1
+        
+        print(samples)
+        
+        for sample in samples:
+            pygame.mixer.Sound(sample).play()
+        
+        current_hit += 1
+        if current_hit > 15:
+            current_hit = 0
+        
+        millis = int(60 / bpm * 1000)
+        root.after(millis, tick)  # Schedule the tick function to run
+    else:
+        pass
+
+def stop_pattern():
+    global playing, current_hit
+    playing = False
+    current_hit = 0
+    pygame.mixer.stop()
+    
+
+# Start the tick loop
+tick()
 
 # Create the main window
 root = tk.Tk()
