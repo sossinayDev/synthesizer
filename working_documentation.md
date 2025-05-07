@@ -9,4 +9,5 @@
     - Styling-Änderungen: Der aktuell abgespielte Schlag wird etwas heller
     - Playback-Einstellungen: Das Pattern kann nun abgespielt, pausiert und gestoppt werden
     - Playback-Geschwindigkeit: Die Geschwindigkeit des Patterns kann geändert werden. (Limit: 500 BPM)
+    - Playback-Geschwindigkeit: Die Anzahl Schläge in einem Pattern kann nun geändert werden.
 - Samples: Neuer Snare sample hinzugefügt

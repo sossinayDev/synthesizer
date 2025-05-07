@@ -11,6 +11,10 @@ silkscreen = None
 
 settings = {}
 
+audio_samples = {}
+
+pattern_beats = 32
+
 active = "#aaccff"
 inactive = "#001133"
 background = "#000000"
@@ -56,7 +60,7 @@ def fill_buttons(frame, rows, cols, on_button_click):
             instru_ac = instrument_data["active"]
             
             if col == 0:
-                label = tk.Label(frame, text=f"{instrument_data['short']}", bg=background, fg="white", font=silkscreen)
+                label = tk.Label(frame, text=f"{instrument_data['name']}", bg=background, fg="white", font=silkscreen)
                 label.grid(row=row, column=col, padx=5, pady=2, sticky="nsew", columnspan=1)
             else:
                 button = tk.Button(frame, text="", bg=instru_inac, fg="white", border=0, relief="flat", highlightthickness=0)
@@ -66,13 +70,13 @@ def fill_buttons(frame, rows, cols, on_button_click):
     frame.grid_propagate(False)
 
 def on_button_click(button):
-    global instruments, pattern
+    global instruments, pattern, playing, audio_samples, pattern_beats
     if button.winfo_name().replace("!button", "") == "":
         col = 0
         row = 0
     else:
         button_id = int(button.winfo_name().replace("!button", ""))
-        cols = 16
+        cols = pattern_beats
         row = (button_id-1) // cols
         col = (button_id-1) % cols
     print(col, row)
@@ -81,9 +85,13 @@ def on_button_click(button):
     instru_inac = instrument_data["inactive"]
     instru_ac = instrument_data["active"]
     
+    
+    
     pattern[col][row]["enabled"] = not pattern[col][row]["enabled"]
     if pattern[col][row]["enabled"]:
         button.config(bg=instru_ac)
+        if not playing:
+            audio_samples[instrument_data["name"]].play()
     else:
         button.config(bg=instru_inac)
     
@@ -98,7 +106,7 @@ def apply_pattern(pattern_data):
             instru_inac = instrument_data["inactive"]
             instru_ac = instrument_data["active"]
             if highligted_col == column:
-                instru_ac = f"#{min(int(instru_ac[1:3], 16) + col_increase, 255):02x}{min(int(instru_ac[3:5], 16) + col_increase, 255):02x}{min(int(instru_ac[5:7], 16) + col_increase, 255):02x}"
+                instru_ac = f"#{min(int(instru_ac[1:3], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[3:5], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[5:7], pattern_beats) + col_increase, 255):02x}"
             if pattern[column][row]["enabled"]:
                 button.config(bg=instru_ac)
             else:
@@ -113,7 +121,7 @@ def apply_single_pattern_col(pattern_data, column):
         instru_inac = instrument_data["inactive"]
         instru_ac = instrument_data["active"]
         if highligted_col == column:
-            instru_ac = f"#{min(int(instru_ac[1:3], 16) + col_increase, 255):02x}{min(int(instru_ac[3:5], 16) + col_increase, 255):02x}{min(int(instru_ac[5:7], 16) + col_increase, 255):02x}"
+            instru_ac = f"#{min(int(instru_ac[1:3], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[3:5], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[5:7], pattern_beats) + col_increase, 255):02x}"
         if pattern[column][row]["enabled"]:
             button.config(bg=instru_ac)
         else:
@@ -122,24 +130,31 @@ def apply_single_pattern_col(pattern_data, column):
             
 def save_pattern(filename):
     print("saving pattern to "+filename)
-    global current_kit_name, pattern
+    global current_kit_name, pattern, bpm, pattern_beats
     pattern_data = {
         "kit": current_kit_name,
-        "pattern": pattern
+        "pattern": pattern,
+        "bpm": bpm,
+        "length": pattern_beats
     }
     json.dump(pattern_data, open(filename, "w"))
     update_file_menu()
-    
+
+bpm_entry = None
 def load_pattern(filename):
-    global pattern
+    global pattern, bpm_entry, bpm, pattern_beats
     data = json.load(open(filename, "r"))
     load_kit(data["kit"])
     pattern = data["pattern"]
+    bpm = data["bpm"]
+    pattern_beats = data["length"]
+    bpm_entry.delete(0, tk.END)
+    bpm_entry.insert(0, str(bpm))
     apply_pattern(pattern)
 
 
 def load_kit(kit_name):
-    global instruments, pattern, top_frame, bottom_left_frame, bottom_middle_frame, bottom_right_frame, bottom_extra_left_frame, bottom_extra_right_frame, current_kit_name
+    global instruments, audio_samples, pattern, top_frame, current_hit, pattern_beats, bottom_left_frame, highligted_col, bottom_middle_frame, bottom_right_frame, bottom_extra_left_frame, bottom_extra_right_frame, current_kit_name, playing
     current_kit_name = kit_name
     kit_data = json.load(open("kits/"+kit_name+".json"))
     instruments = kit_data["samples"]
@@ -153,10 +168,9 @@ def load_kit(kit_name):
     root.grid_columnconfigure(3, weight=1)
     root.grid_columnconfigure(4, weight=1)
 
-    # Top section: 16x7 grid of buttons
     top_frame = tk.Frame(root, bg="black")
     top_frame.grid(row=0, column=0, columnspan=5, sticky="nsew")
-    fill_buttons(top_frame, len(instruments), 16, on_button_click)
+    fill_buttons(top_frame, len(instruments), pattern_beats, on_button_click)
 
     # Bottom left section
     bottom_left_frame = tk.Frame(root, bg=panels)
@@ -173,6 +187,8 @@ def load_kit(kit_name):
     # Bottom right section
     bottom_right_frame = tk.Frame(root, bg=panels)
     bottom_right_frame.grid(row=1, column=2, sticky="nsew")
+    
+    update_pattern_menu()
 
     # Bottom extra left section
     bottom_extra_left_frame = tk.Frame(root, bg=panels)
@@ -183,7 +199,7 @@ def load_kit(kit_name):
     bottom_extra_right_frame.grid(row=1, column=4, sticky="nsew")
     
     pattern = []
-    for e in range(16):
+    for e in range(pattern_beats):
         column = []
         for e in range(len(instruments)):
             column.append({
@@ -192,6 +208,16 @@ def load_kit(kit_name):
         pattern.append(column)
     
     root.configure(bg="black")
+    playing = False
+    highligted_col = 0
+    apply_single_pattern_col(pattern, current_hit)
+    apply_single_pattern_col(pattern, 0)
+    current_hit = 0
+    
+    for instrument in instruments:
+        d=instruments[instrument]
+        audio_samples[d["name"]]=pygame.mixer.Sound("samples/"+d["file"])
+    
 
 def delete_pattern(pattern):
     try:
@@ -199,6 +225,13 @@ def delete_pattern(pattern):
         update_file_menu()
     except FileNotFoundError:
         pass
+    
+def new_pattern():
+    global pattern, current_kit_name, current_hit, playing
+    current_hit = 0
+    load_kit(current_kit_name)
+    playing = False
+    current_hit = 0
     
 filename_entry = None
 pattern_var = None
@@ -247,6 +280,10 @@ def update_file_menu():
 
         delete_button = tk.Button(file_frame, text="Delete", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         delete_button.pack(fill="x", padx=10, pady=5)
+    
+    # Add new button
+    new_button = tk.Button(file_frame, text="New Pattern", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: new_pattern())
+    new_button.pack(fill="x", padx=10, pady=5)
 
     # Add "Kits" section
     kit_frame = tk.LabelFrame(bottom_left_frame, text="Kits", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
@@ -268,7 +305,7 @@ def update_file_menu():
 play_button = None
 
 def update_playback_menu():
-    global bottom_middle_frame, play_button, bpm
+    global bottom_middle_frame, play_button, bpm, bpm_entry
     clear_screen(bottom_middle_frame)
     playback_area = tk.LabelFrame(bottom_middle_frame, text="Playback", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     playback_area.pack(fill="x", padx=10, pady=5)
@@ -305,14 +342,53 @@ def update_playback_menu():
                 bpm = 10
             if bpm > 500:
                 bpm = 500
+            bpm_entry.delete(0, tk.END)
+            bpm_entry.insert(0, str(bpm))
             print(f"BPM updated to {bpm}")
         except ValueError:
             bpm_entry.delete(0, tk.END)
             bpm_entry.insert(0, str(bpm))
+            
 
     update_bpm_button = tk.Button(bpm_frame, text="Update BPM", bg=buttons, border=0, fg="white", font=silkscreen, command=update_bpm)
     update_bpm_button.pack(fill="x", padx=10, pady=5)
-    
+
+def update_pattern_menu():
+    global bottom_right_frame, pattern_beats
+    clear_screen(bottom_right_frame)
+
+    # Add "Timing" subsection
+    timing_frame = tk.LabelFrame(bottom_right_frame, text="Timing", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    timing_frame.pack(fill="x", padx=10, pady=5)
+
+    # Add entry for hits
+    hits_entry = tk.Entry(timing_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
+    hits_entry.insert(0, str(pattern_beats))
+    hits_entry.pack(fill="x", padx=5, pady=5, ipady=5)
+
+    def update_hits():
+        global pattern_beats, pattern
+        try:
+            new_hits = int(hits_entry.get())
+            if new_hits < 4:
+                new_hits = 4
+            if new_hits > 128:
+                new_hits = 128
+            pattern_beats = new_hits
+            hits_entry.delete(0, tk.END)
+            hits_entry.insert(0, str(pattern_beats))
+            save_pattern("patterns/autosave.json")
+            load_kit(current_kit_name)  # Reload the kit to apply the new pattern length
+            load_pattern("patterns/autosave.json")
+            print(f"Pattern hits updated to {pattern_beats}")
+        except ValueError:
+            hits_entry.delete(0, tk.END)
+            hits_entry.insert(0, str(pattern_beats))
+
+    # Add button to update hits
+    update_hits_button = tk.Button(timing_frame, text="Update Hits", bg=buttons, border=0, fg="white", font=silkscreen, command=update_hits)
+    update_hits_button.pack(fill="x", padx=10, pady=5)
+
 playing = False
 
 def play_pause_pattern():
@@ -331,32 +407,29 @@ bpm = 80
 current_hit = 0
 
 def tick():
-    global bpm, current_hit, pattern, highligted_col
+    global bpm, current_hit, pattern, highligted_col, audio_samples, pattern_beats
     if playing:
-        print("tick")
         samples = []
         i = 0
         for instr in pattern[current_hit]:
             if instr["enabled"]:
                 i_data = instruments[list(instruments.keys())[i]]
-                samples.append("samples/"+i_data["file"])
+                samples.append(audio_samples[i_data["name"]])
             i += 1
         
-        print(samples)
-        
         for sample in samples:
-            pygame.mixer.Sound(sample).play()
+            sample.play()
         
         highligted_col = current_hit
         apply_single_pattern_col(pattern, current_hit)
         if current_hit > 0:
             apply_single_pattern_col(pattern, current_hit-1)
         else:
-            apply_single_pattern_col(pattern, 15)
+            apply_single_pattern_col(pattern, pattern_beats-1)
             
         
         current_hit += 1
-        if current_hit > 15:
+        if current_hit > pattern_beats-1:
             current_hit = 0
         
         millis = int(60 / bpm * 1000)
@@ -365,7 +438,10 @@ def tick():
         pass
 
 def stop_pattern():
-    global playing, current_hit
+    global playing, current_hit, pattern, highligted_col
+    highligted_col = 0
+    apply_single_pattern_col(pattern, 0)
+    apply_single_pattern_col(pattern, current_hit)
     playing = False
     current_hit = 0
     play_image = ImageTk.PhotoImage(file="img/play.png")
