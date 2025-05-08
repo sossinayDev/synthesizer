@@ -71,22 +71,22 @@ def fill_buttons(frame, rows, cols, on_button_click):
 
 def on_button_click(button):
     global instruments, pattern, playing, audio_samples, pattern_beats
+    
     if button.winfo_name().replace("!button", "") == "":
         col = 0
         row = 0
     else:
         button_id = int(button.winfo_name().replace("!button", ""))
-        cols = pattern_beats
+        cols = len(pattern)
         row = (button_id-1) // cols
         col = (button_id-1) % cols
     print(col, row)
-    
+        
     instrument_data = instruments[list(instruments.keys())[row]]
     instru_inac = instrument_data["inactive"]
     instru_ac = instrument_data["active"]
     
-    
-    
+    print(pattern[col])
     pattern[col][row]["enabled"] = not pattern[col][row]["enabled"]
     if pattern[col][row]["enabled"]:
         button.config(bg=instru_ac)
@@ -94,19 +94,22 @@ def on_button_click(button):
             audio_samples[instrument_data["name"]].play()
     else:
         button.config(bg=instru_inac)
+    apply_single_pattern_col(pattern, col)
+    print(pattern[col])
     
 highligted_col = 0
 def apply_pattern(pattern_data):
     global pattern, instruments, col_increase
     pattern = pattern_data
     for column in range(len(pattern)):
-        for row in range(len(pattern[column])):
+        for row in range(len(pattern[0])):
             button = top_frame.grid_slaves(row=row, column=column+1)[0]
             instrument_data = instruments[list(instruments.keys())[row]]
             instru_inac = instrument_data["inactive"]
             instru_ac = instrument_data["active"]
             if highligted_col == column:
-                instru_ac = f"#{min(int(instru_ac[1:3], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[3:5], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[5:7], pattern_beats) + col_increase, 255):02x}"
+                instru_ac = f"#{min(int(instru_ac[1:3], 16) + col_increase, 255):02x}{min(int(instru_ac[3:5], 16) + col_increase, 255):02x}{min(int(instru_ac[5:7], 16) + col_increase, 255):02x}"
+                instru_inac = f"#{min(int(instru_inac[1:3], 16) + int(col_increase/3), 255):02x}{min(int(instru_inac[3:5], 16) + int(col_increase/3), 255):02x}{min(int(instru_inac[5:7], 16) + int(col_increase/3), 255):02x}"
             if pattern[column][row]["enabled"]:
                 button.config(bg=instru_ac)
             else:
@@ -121,7 +124,8 @@ def apply_single_pattern_col(pattern_data, column):
         instru_inac = instrument_data["inactive"]
         instru_ac = instrument_data["active"]
         if highligted_col == column:
-            instru_ac = f"#{min(int(instru_ac[1:3], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[3:5], pattern_beats) + col_increase, 255):02x}{min(int(instru_ac[5:7], pattern_beats) + col_increase, 255):02x}"
+            instru_ac = f"#{min(int(instru_ac[1:3], 16) + col_increase, 255):02x}{min(int(instru_ac[3:5], 16) + col_increase, 255):02x}{min(int(instru_ac[5:7], 16) + col_increase, 255):02x}"
+            instru_inac = f"#{min(int(instru_inac[1:3], 16) + int(col_increase/3), 255):02x}{min(int(instru_inac[3:5], 16) + int(col_increase/3), 255):02x}{min(int(instru_inac[5:7], 16) + int(col_increase/3), 255):02x}"
         if pattern[column][row]["enabled"]:
             button.config(bg=instru_ac)
         else:
@@ -133,7 +137,7 @@ def save_pattern(filename):
     global current_kit_name, pattern, bpm, pattern_beats
     pattern_data = {
         "kit": current_kit_name,
-        "pattern": pattern,
+        "pattern": pattern[:pattern_beats],
         "bpm": bpm,
         "length": pattern_beats
     }
@@ -142,14 +146,17 @@ def save_pattern(filename):
 
 bpm_entry = None
 def load_pattern(filename):
-    global pattern, bpm_entry, bpm, pattern_beats
+    global pattern, bpm_entry, bpm, pattern_beats, hits_entry, instruments
     data = json.load(open(filename, "r"))
+    pattern_beats = data["length"]
+    hits_entry.delete(0, tk.END)
+    hits_entry.insert(0, str(pattern_beats))
     load_kit(data["kit"])
     pattern = data["pattern"]
     bpm = data["bpm"]
-    pattern_beats = data["length"]
     bpm_entry.delete(0, tk.END)
     bpm_entry.insert(0, str(bpm))
+    print(pattern)
     apply_pattern(pattern)
 
 
@@ -235,6 +242,7 @@ def new_pattern():
     
 filename_entry = None
 pattern_var = None
+hits_entry = None
 
 
 def update_file_menu():
@@ -354,7 +362,7 @@ def update_playback_menu():
     update_bpm_button.pack(fill="x", padx=10, pady=5)
 
 def update_pattern_menu():
-    global bottom_right_frame, pattern_beats
+    global bottom_right_frame, pattern_beats, hits_entry
     clear_screen(bottom_right_frame)
 
     # Add "Timing" subsection
@@ -365,9 +373,8 @@ def update_pattern_menu():
     hits_entry = tk.Entry(timing_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
     hits_entry.insert(0, str(pattern_beats))
     hits_entry.pack(fill="x", padx=5, pady=5, ipady=5)
-
     def update_hits():
-        global pattern_beats, pattern
+        global pattern_beats, pattern, instruments
         try:
             new_hits = int(hits_entry.get())
             if new_hits < 4:
@@ -375,10 +382,17 @@ def update_pattern_menu():
             if new_hits > 128:
                 new_hits = 128
             pattern_beats = new_hits
+            col = []
+            for i in instruments:
+                col.append({
+                    "enabled": False
+                })
+            while len(pattern) < pattern_beats:
+                pattern.append(col)
             hits_entry.delete(0, tk.END)
             hits_entry.insert(0, str(pattern_beats))
             save_pattern("patterns/autosave.json")
-            load_kit(current_kit_name)  # Reload the kit to apply the new pattern length
+            load_kit(current_kit_name)
             load_pattern("patterns/autosave.json")
             print(f"Pattern hits updated to {pattern_beats}")
         except ValueError:
