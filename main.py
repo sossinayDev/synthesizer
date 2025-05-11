@@ -453,9 +453,10 @@ def tick():
 
 def stop_pattern():
     global playing, current_hit, pattern, highligted_col
+    t=highligted_col
     highligted_col = 0
+    apply_single_pattern_col(pattern, t)
     apply_single_pattern_col(pattern, 0)
-    apply_single_pattern_col(pattern, current_hit)
     playing = False
     current_hit = 0
     play_image = ImageTk.PhotoImage(file="img/play.png")

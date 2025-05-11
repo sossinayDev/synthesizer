@@ -19,3 +19,5 @@
 - Neue Samples
 - Meme Samples
 - Neue Kits mit den Samples erstellt.
+- main.py:
+    - Bugfix: Die zuletzt gespielte spalte wird bei Wiedergaben-Stop wieder normal.
