@@ -1,0 +1,34 @@
+{
+    "name": "TR808/TR909 kit",
+    "description": "A basic drum kit for the TR808 and TR909",
+    "samples": {
+        "kick8": {
+            "name": "Kick (TR808)",
+            "short": "KCK8",
+            "inactive": "#444444",
+            "active": "#aaaaaa",
+            "file": "tr808-kick.wav"
+        },
+        "snare8": {
+            "name": "Snare (TR808)",
+            "short": "SNR8",
+            "inactive": "#440000",
+            "active": "#aa0000",
+            "file": "tr808-snare.wav"
+        },
+        "kick9": {
+            "name": "Kick (TR909)",
+            "short": "KCK9",
+            "inactive": "#000044",
+            "active": "#0000aa",
+            "file": "tr909-kick.wav"
+        },
+        "snare9": {
+            "name": "Snare (TR909)",
+            "short": "SNR9",
+            "inactive": "#004444",
+            "active": "#00aaaa",
+            "file": "tr909-snare.wav"
+        }
+    }
+}

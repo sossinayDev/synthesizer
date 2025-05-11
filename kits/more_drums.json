@@ -1,0 +1,48 @@
+{
+    "name": "Basic kit",
+    "description": "A basic drum kit",
+    "samples": {
+        "drum-hit": {
+            "name": "Drum hit",
+            "short": "DHT",
+            "inactive": "#444444",
+            "active": "#aaaaaa",
+            "file": "drum-hit.wav"
+        },
+        "drum-roll": {
+            "name": "Drum roll",
+            "short": "DRL",
+            "inactive": "#004444",
+            "active": "#00aaaa",
+            "file": "drum-roll.wav"
+        },
+        "fail-drum": {
+            "name": "Faliure drum",
+            "short": "FAD",
+            "inactive": "#004444",
+            "active": "#00aaaa",
+            "file": "drum-roll.wav"
+        },
+        "hit-superclash": {
+            "name": "Hit Superclash",
+            "short": "HTS",
+            "inactive": "#444400",
+            "active": "#aaaa00",
+            "file": "hit-superclash.wav"
+        },
+        "kick-drum": {
+            "name": "Kick drum",
+            "short": "KDR",
+            "inactive": "#444422",
+            "active": "#aaaa99",
+            "file": "kick-drum.wav"
+        },
+        "hit-echo": {
+            "name": "Hit Echo",
+            "short": "HTE",
+            "inactive": "#440044",
+            "active": "#aa00aa",
+            "file": "hit-echo.wav"
+        }
+    }
+}
