@@ -15,3 +15,7 @@
 - main.py:
     - Styling-Änderungen: Auch inaktive Knöpfe werden nun hervorgehoben, wenn deren Schlag abgespielt wird.
     - Pattern-Länge: Die Länge der Patterns werden nun in der Pattern-Datei gespeichert und geladen.
+## 11.05.2025
+- Neue Samples
+- Meme Samples
+- Neue Kits mit den Samples erstellt.

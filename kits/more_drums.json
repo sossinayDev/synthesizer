@@ -21,7 +21,7 @@
             "short": "FAD",
             "inactive": "#004444",
             "active": "#00aaaa",
-            "file": "drum-roll.wav"
+            "file": "failure-drum.wav"
         },
         "hit-superclash": {
             "name": "Hit Superclash",
