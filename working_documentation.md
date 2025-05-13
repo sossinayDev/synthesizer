@@ -21,6 +21,7 @@
 - Neue Kits mit den Samples erstellt.
 - main.py:
     - Bugfix: Die zuletzt gespielte spalte wird bei Wiedergaben-Stop wieder normal.
-## 12.05.2025
+## 13.05.2025
 - main.py:
+    - Der erste hit eines beats kann nun betont werden.
     - Einzelne Instrumente können nun verschiedene Lautstärken haben.
