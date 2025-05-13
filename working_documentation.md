@@ -21,3 +21,6 @@
 - Neue Kits mit den Samples erstellt.
 - main.py:
     - Bugfix: Die zuletzt gespielte spalte wird bei Wiedergaben-Stop wieder normal.
+## 12.05.2025
+- main.py:
+    - Einzelne Instrumente können nun verschiedene Lautstärken haben.
