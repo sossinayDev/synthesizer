@@ -14,6 +14,8 @@ settings = {}
 audio_samples = {}
 
 pattern_beats = 16
+beat_length = 4
+highlight_first_beat_hit = None
 
 active = "#aaccff"
 inactive = "#001133"
@@ -143,7 +145,7 @@ def apply_single_pattern_col(pattern_data, column):
             
 def save_pattern(filename):
     print("saving pattern to "+filename)
-    global current_kit_name, pattern, bpm, pattern_beats, volumes
+    global current_kit_name, pattern, bpm, pattern_beats, volumes, beat_length, highlight_first_beat_hit
     interpret_vols = {}
     for vol in list(volumes.keys()):
         interpret_vols[vol] = volumes[vol].get()
@@ -153,14 +155,18 @@ def save_pattern(filename):
         "pattern": pattern[:pattern_beats],
         "bpm": bpm,
         "length": pattern_beats,
-        "volumes": interpret_vols
+        "volumes": interpret_vols,
+        "beat_length": beat_length,
+        "highlight_first_beat_hit": highlight_first_beat_hit.get()
     }
     json.dump(pattern_data, open(filename, "w"))
     update_file_menu()
 
 bpm_entry = None
+beat_length_entry = None
+
 def load_pattern(filename):
-    global pattern, bpm_entry, bpm, pattern_beats, hits_entry, instruments, volumes
+    global pattern, bpm_entry, bpm, pattern_beats, hits_entry, instruments, volumes, beat_length, highlight_first_beat_hit, beat_length_entry, highlight_first_beat_hit_entry
     data = json.load(open(filename, "r"))
     pattern_beats = data["length"]
     hits_entry.delete(0, tk.END)
@@ -177,6 +183,24 @@ def load_pattern(filename):
     except KeyError:
         for instr in list(list(instruments.keys())):
             volumes[instr]=tk.IntVar(value=100)
+    
+    try:
+        beat_length = data["beat_length"]
+        print(beat_length)
+        beat_length_entry.delete(0, tk.END)
+        beat_length_entry.insert(0, str(beat_length))
+    except KeyError:
+        pass
+    
+    try:
+        if highlight_first_beat_hit:
+            highlight_first_beat_hit.set(data["highlight_first_beat_hit"])
+        else:
+            highlight_first_beat_hit = tk.BooleanVar(value=data["highlight_first_beat_hit"])
+        
+        
+    except KeyError:
+        pass
     
     print(pattern)
     apply_pattern(pattern)
@@ -241,7 +265,10 @@ def load_kit(kit_name):
     root.configure(bg="black")
     playing = False
     highligted_col = 0
-    apply_single_pattern_col(pattern, current_hit)
+    try:
+        apply_single_pattern_col(pattern, current_hit)
+    except:
+        pass
     apply_single_pattern_col(pattern, 0)
     current_hit = 0
     
@@ -269,6 +296,7 @@ def new_pattern():
 filename_entry = None
 pattern_var = None
 hits_entry = None
+highlight_first_beat_hit_entry = None
 
 
 def update_file_menu():
@@ -339,7 +367,7 @@ def update_file_menu():
 play_button = None
 
 def update_playback_menu():
-    global bottom_middle_frame, play_button, bpm, bpm_entry
+    global bottom_middle_frame, play_button, bpm, bpm_entry, beat_length, beat_length_entry
     clear_screen(bottom_middle_frame)
     playback_area = tk.LabelFrame(bottom_middle_frame, text="Playback", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     playback_area.pack(fill="x", padx=10, pady=5)
@@ -369,7 +397,7 @@ def update_playback_menu():
     bpm_entry.pack(fill="x", padx=5, pady=5, ipady=5)
 
     def update_bpm():
-        global bpm
+        global bpm, bpm_entry
         try:
             bpm = int(bpm_entry.get())
             if bpm < 10:
@@ -388,7 +416,7 @@ def update_playback_menu():
     update_bpm_button.pack(fill="x", padx=10, pady=5)
 
 def update_pattern_menu():
-    global bottom_right_frame, pattern_beats, hits_entry
+    global bottom_right_frame, pattern_beats, hits_entry, beat_length_entry, beat_length, highlight_first_beat_hit, highlight_first_beat_hit_entry
     clear_screen(bottom_right_frame)
 
     # Add "Timing" subsection
@@ -428,6 +456,45 @@ def update_pattern_menu():
     # Add button to update hits
     update_hits_button = tk.Button(timing_frame, text="Update Hits", bg=buttons, border=0, fg="white", font=silkscreen, command=update_hits)
     update_hits_button.pack(fill="x", padx=10, pady=5)
+    
+    beat_length_entry = tk.Entry(timing_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
+    beat_length_entry.insert(0, str(beat_length))
+    beat_length_entry.pack(fill="x", padx=5, pady=5, ipady=5)
+    
+    def update_beat_length():
+        global beat_length, beat_length_entry
+        try:
+            beat_length = int(beat_length_entry.get())
+            if beat_length < 1:
+                beat_length = 1
+            beat_length_entry.delete(0, tk.END)
+            beat_length_entry.insert(0, str(beat_length))
+            print(f"Beat length updated to {beat_length}")
+        except ValueError:
+            beat_length_entry.delete(0, tk.END)
+            beat_length_entry.insert(0, str(beat_length))
+            
+    update_bpm_button = tk.Button(timing_frame, text="Update beat length", bg=buttons, border=0, fg="white", font=silkscreen, command=update_beat_length)
+    update_bpm_button.pack(fill="x", padx=10, pady=5)    
+    
+    if highlight_first_beat_hit is None:
+        highlight_first_beat_hit = tk.BooleanVar(value=True)
+
+    highlight_frame = tk.Frame(timing_frame, bg=buttons)
+    highlight_frame.pack(fill="x", padx=10, pady=5)
+
+    highlight_label = tk.Label(highlight_frame, text="Highlight first beat hit", bg=buttons, fg="white")
+    highlight_label.pack(side="left")
+
+    highlight_first_beat_hit_entry = tk.Checkbutton(
+        highlight_frame,
+        variable=highlight_first_beat_hit,
+        onvalue=True,
+        offvalue=False,
+        bg=buttons
+    )
+    highlight_first_beat_hit_entry.pack(side="left")
+
 
 def update_instrument_menu():
     global bottom_extra_left_frame, instruments, panels, sliders, volumes
@@ -470,15 +537,26 @@ bpm = 80
 current_hit = 0
 
 def tick():
-    global bpm, current_hit, pattern, highligted_col, audio_samples, pattern_beats, volumes
+    global bpm, current_hit, pattern, highligted_col, audio_samples, pattern_beats, volumes, beat_length, highlight_first_beat_hit
+    if highlight_first_beat_hit:
+        print(highlight_first_beat_hit.get())
     if playing:
+        pygame.mixer.stop()
         samples = []
         i = 0
         for instr in pattern[current_hit]:
             if instr["enabled"]:
                 i_data = instruments[list(instruments.keys())[i]]
                 sample = audio_samples[i_data["name"]]
-                sample.set_volume(volumes[i_data["name"]].get()/100)
+                vol = volumes[i_data["name"]].get()/100
+                if highlight_first_beat_hit:
+                    if highlight_first_beat_hit.get() and current_hit % beat_length != 0:
+                        vol /= 2
+                    
+                    
+                sample.set_volume(vol)
+
+                    
                 samples.append(sample)
             i += 1
         
@@ -497,8 +575,8 @@ def tick():
         if current_hit > pattern_beats-1:
             current_hit = 0
         
-        millis = int(60 / bpm * 1000)
-        root.after(millis, tick)  # Schedule the tick function to run
+        millis = int(60 / bpm * 1000 / beat_length)
+        root.after(millis, tick)
     else:
         pass
 
