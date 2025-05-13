@@ -1,0 +1,41 @@
+{
+    "name": "Percussion Kit",
+    "description": "A percussion kit with a variety of sounds",
+    "samples": {
+        "clap-2": {
+            "name": "Clap",
+            "short": "CLP",
+            "inactive": "#332200",
+            "active": "#bb7a00",
+            "file": "clap-2.wav"
+        },
+        "fresh_snap": {
+            "name": "Snap",
+            "short": "SNP",
+            "inactive": "#333300",
+            "active": "#bbbb00",
+            "file": "fresh_snap.wav"
+        },
+        "percussion-snap-103929.wav": {
+            "name": "Percussion Snap",
+            "short": "PSN",
+            "inactive": "#223300",
+            "active": "#77bb00",
+            "file": "percussion-snap-103929.wav"
+        },
+        "sax-percussion": {
+            "name": "Sax Percussion",
+            "short": "SPC",
+            "inactive": "#003322",
+            "active": "#00bb77",
+            "file": "sax-percussion.wav"
+        },
+        "Stomp": {
+            "name": "Stomp",
+            "short": "STP",
+            "inactive": "#002233",
+            "active": "#0077bb",
+            "file": "stomp.wav"
+        }
+    }
+}

@@ -29,6 +29,20 @@
             "inactive": "#004444",
             "active": "#00aaaa",
             "file": "tr909-snare.wav"
+        },
+        "mixkit-tribal-dry-drum588": {
+            "name": "Tribal Dry Drum",
+            "short": "TRB",
+            "inactive": "#552200",
+            "active": "#FF8C00",
+            "file": "mixkit-tribal-dry-drum-558.wav"
+        },
+        "mixkit-hand-tribal-drum-562": {
+            "name": "Hand Tribal Drum",
+            "short": "HTD",
+            "inactive": "#004422",
+            "active": "#00FF7F",
+            "file": "mixkit-hand-tribal-drum-562.wav"
         }
     }
 }
