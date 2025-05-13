@@ -5,6 +5,7 @@
         "background": "#000000",
         "panels": "#050505",
         "buttons": "#202040",
+        "sliders": "#101020",
         "col_increase": 100
     }
 }

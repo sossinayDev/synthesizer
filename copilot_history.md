@@ -278,3 +278,47 @@ def stop_pattern():
 - Supports various audio formats like `.wav`, `.mp3`, and `.ogg`.
 
 This change should simplify the audio playback process and avoid the installation issues with `simpleaudio`.
+
+
+button.config(command=lambda b=button: on_button_click(b))
+
+If right clicked, the button should run the function "on_button_right_click"
+
+To allow a `tkinter` button to respond to both **left-click** (default behavior) and **right-click**, you need to bind the right-click event separately using the `.bind()` method, since `command=` only handles left-clicks (specifically, left mouse button release).
+
+Here's how you can modify your code so that:
+
+* **Left click** runs `on_button_click`
+* **Right click** runs `on_button_right_click`
+
+### ✅ Example:
+
+```python
+import tkinter as tk
+
+def on_button_click(button):
+    print(f"Left clicked: {button}")
+
+def on_button_right_click(event, button):
+    print(f"Right clicked: {button}")
+
+root = tk.Tk()
+
+button = tk.Button(root, text="Click Me")
+button.config(command=lambda b=button: on_button_click(b))
+
+# Bind right-click (Button-3 on most systems)
+button.bind("<Button-3>", lambda event, b=button: on_button_right_click(event, b))
+
+button.pack()
+
+root.mainloop()
+```
+
+### 🧠 Notes:
+
+* `<Button-3>` is the right mouse button (on Linux/Windows/macOS with standard mouse settings).
+* The `event` parameter is required in the callback for `.bind()`.
+* You pass both `event` and `button` to the `on_button_right_click()` function to access button-specific logic.
+
+Let me know if you want this to work with multiple buttons dynamically.
