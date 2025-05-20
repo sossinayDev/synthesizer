@@ -5,3 +5,5 @@ A synthesizer.
 - tkinter
 - pillow
 - pygame
+- os
+- json

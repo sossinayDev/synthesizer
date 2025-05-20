@@ -11,6 +11,8 @@ silkscreen = None
 
 settings = {}
 
+preview_enabled = True
+
 audio_samples = {}
 
 pattern_beats = 16
@@ -25,11 +27,22 @@ buttons= "#aaaaaa"
 sliders= "#101020"
 col_increase = 50
 
+MAX_COLLECTION_LENGTH = 10
+
+pattern_collection_var = None
+
+dropdowns_container = None
+add_button = None
+
+current_pattern = 0
+
 current_kit_name = ""
 
 instruments = []
 pattern = []
 volumes = {}
+
+
 
 def load_settings():
     global settings, active, inactive, background, panels, buttons, col_increase, sliders
@@ -53,30 +66,24 @@ def fill_buttons(frame, rows, cols, on_button_click, on_button_right_click=None)
     global instruments
     if on_button_right_click is None:
         on_button_right_click = on_button_click
-    """Fills the given frame with a grid of buttons."""
+    """Fills the given frame with a grid of buttons quickly using local variables."""
+    instrument_keys = list(instruments.keys())
+    frame.grid_propagate(False)
     for row in range(rows):
         frame.grid_rowconfigure(row, weight=1)
+        instrument_data = instruments[instrument_keys[row]]
+        instru_inac = instrument_data["inactive"]
+        instru_ac = instrument_data["active"]
+        label = tk.Label(frame, text=f"{instrument_data['name']}", bg=background, fg="white", font=silkscreen)
+        label.grid(row=row, column=0, padx=5, pady=2, sticky="nsew", columnspan=1)
+        for col in range(1, cols + 1):
+            button = tk.Button(frame, text="", bg=instru_inac, fg="white", border=0, relief="flat", highlightthickness=0)
+            button.grid(row=row, column=col, padx=1, pady=1, sticky="nsew")
+            button.config(command=lambda b=button: on_button_click(b))
+            button.bind("<Button-3>", lambda event, b=button: on_button_right_click(b))
     for col in range(cols):
         frame.grid_columnconfigure(col+1, weight=1)
 
-    for row in range(rows):
-        for col in range(cols + 1):
-            instrument_data = instruments[list(instruments.keys())[row]]
-            
-            instru_inac = instrument_data["inactive"]
-            instru_ac = instrument_data["active"]
-            
-            if col == 0:
-                label = tk.Label(frame, text=f"{instrument_data['name']}", bg=background, fg="white", font=silkscreen)
-                label.grid(row=row, column=col, padx=5, pady=2, sticky="nsew", columnspan=1)
-            else:
-                button = tk.Button(frame, text="", bg=instru_inac, fg="white", border=0, relief="flat", highlightthickness=0)
-                button.grid(row=row, column=col, padx=1, pady=1, sticky="nsew")
-                button.config(command=lambda b=button: on_button_click(b))
-                button.bind("<Button-3>", lambda event, b=button: on_button_right_click(b))
-    # Adjust the frame's padding to ensure all buttons fit within the visible area
-    frame.grid_propagate(False)
-    
 def on_button_right_click(button):
     global pattern, instruments
 
@@ -165,8 +172,60 @@ def save_pattern(filename):
 bpm_entry = None
 beat_length_entry = None
 
+def disable_preview():
+    global top_frame, preview_enabled
+    preview_enabled = False
+    clear_screen(top_frame)
+    label = tk.Label(top_frame, text="Vorschau deaktiviert (Wegen Pattern-Abfolge)")
+    label.config(fg="white", bg="black")
+    label.pack()
+
+def quickload_pattern(filename):
+    print(f"Quickloading {filename}")
+    global pattern, bpm_entry, bpm, pattern_beats, hits_entry, playing, instruments, volumes, beat_length, highlight_first_beat_hit, beat_length_entry, highlight_first_beat_hit_entry
+    playing = False
+    disable_preview()
+    data = json.load(open(filename, "r"))
+    pattern_beats = data["length"]
+    hits_entry.delete(0, tk.END)
+    hits_entry.insert(0, str(pattern_beats))
+    quickload_kit(data["kit"])
+    pattern = data["pattern"]
+    bpm = data["bpm"]
+    bpm_entry.delete(0, tk.END)
+    bpm_entry.insert(0, str(bpm))
+    try:
+        for instr in list(data["volumes"].keys()):
+            volumes[instr].set(data["volumes"][instr])
+    except KeyError:
+        for instr in list(list(instruments.keys())):
+            volumes[instr]=tk.IntVar(value=100)
+    
+    try:
+        beat_length = data["beat_length"]
+        print(beat_length)
+        beat_length_entry.delete(0, tk.END)
+        beat_length_entry.insert(0, str(beat_length))
+    except KeyError:
+        pass
+    
+    try:
+        if highlight_first_beat_hit:
+            highlight_first_beat_hit.set(data["highlight_first_beat_hit"])
+        else:
+            highlight_first_beat_hit = tk.BooleanVar(value=data["highlight_first_beat_hit"])
+        
+        
+    except KeyError:
+        pass
+    
+    print(pattern)
+    playing = True
+    
+
 def load_pattern(filename):
-    global pattern, bpm_entry, bpm, pattern_beats, hits_entry, instruments, volumes, beat_length, highlight_first_beat_hit, beat_length_entry, highlight_first_beat_hit_entry
+    global pattern, bpm_entry, preview_enabled, bpm, pattern_beats, hits_entry, instruments, volumes, beat_length, highlight_first_beat_hit, beat_length_entry, highlight_first_beat_hit_entry
+    preview_enabled = True
     data = json.load(open(filename, "r"))
     pattern_beats = data["length"]
     hits_entry.delete(0, tk.END)
@@ -205,9 +264,19 @@ def load_pattern(filename):
     print(pattern)
     apply_pattern(pattern)
 
+def quickload_kit(kit_name):
+    global instruments, audio_samples, pattern, top_frame, current_hit, pattern_beats, bottom_left_frame, highligted_col, bottom_middle_frame, bottom_right_frame, bottom_extra_left_frame, bottom_extra_right_frame, current_kit_name, playing
+    current_kit_name = kit_name
+    kit_data = json.load(open("kits/"+kit_name+".json"))
+    instruments = kit_data["samples"]
+    
+    for instrument in instruments:
+        d=instruments[instrument]
+        audio_samples[d["name"]]=pygame.mixer.Sound("samples/"+d["file"])
 
 def load_kit(kit_name):
-    global instruments, audio_samples, pattern, top_frame, current_hit, pattern_beats, bottom_left_frame, highligted_col, bottom_middle_frame, bottom_right_frame, bottom_extra_left_frame, bottom_extra_right_frame, current_kit_name, playing
+    global instruments, audio_samples, preview_enabled, pattern, top_frame, current_hit, pattern_beats, bottom_left_frame, highligted_col, bottom_middle_frame, bottom_right_frame, bottom_extra_left_frame, bottom_extra_right_frame, current_kit_name, playing
+    preview_enabled = True
     current_kit_name = kit_name
     kit_data = json.load(open("kits/"+kit_name+".json"))
     instruments = kit_data["samples"]
@@ -253,6 +322,8 @@ def load_kit(kit_name):
     bottom_extra_right_frame = tk.Frame(root, bg=panels)
     bottom_extra_right_frame.grid(row=1, column=4, sticky="nsew")
     
+    update_pattern_collection_menu()
+    
     pattern = []
     for e in range(pattern_beats):
         column = []
@@ -272,10 +343,196 @@ def load_kit(kit_name):
     apply_single_pattern_col(pattern, 0)
     current_hit = 0
     
-    for instrument in instruments:
-        d=instruments[instrument]
-        audio_samples[d["name"]]=pygame.mixer.Sound("samples/"+d["file"])
+def save_collection(filename):
+    print(f"Saving collection to {filename}")
+    collection_name = collection_name_entry.get().strip()
+    if not collection_name:
+        print("Collection name is empty.")
+        return
+    patterns = get_patterns_in_collection()
+    if not patterns:
+        print("No patterns selected for collection.")
+        return
+
+    data = {
+        "name": collection_name,
+        "patterns": patterns
+    }
+
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     
+    filename = filename.lower().replace(' ', '_')
+    json.dump(data, open(filename, "w", encoding="utf-8"), indent=2)
+    update_file_menu()
+
+def load_collection(filename):
+    global pattern_collection_var, dropdowns_container, add_button
+    if not os.path.isfile(filename):
+        print(f"Collection file {filename} not found.")
+        return
+    with open(filename, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    patterns = data.get("patterns", [])
+    clear_screen(dropdowns_container)
+    pattern_names = [file.replace(".json", "").capitalize() for file in os.listdir("patterns")] + ["- Entfernen"]
+    for pattern_file in patterns:
+        pattern_name = os.path.splitext(os.path.basename(pattern_file))[0].capitalize()
+        var = tk.StringVar(value=pattern_name if pattern_name in pattern_names else pattern_names[0])
+        var.trace_add("write", check_deletions)
+        dropdown = tk.OptionMenu(dropdowns_container, var, *pattern_names)
+        dropdown.config(
+            bg=buttons,
+            fg="white",
+            border=0,
+            borderwidth=0,
+            font=silkscreen,
+            activebackground=buttons,
+            activeforeground="white",
+            highlightbackground=buttons
+        )
+        menu = dropdown["menu"]
+        menu.config(bg=buttons, fg="white", border=0, activebackground=buttons, activeforeground="white")
+        dropdown.pack(fill="x", padx=5, pady=3)
+    if len(patterns) >= MAX_COLLECTION_LENGTH:
+        add_button.config(state='disabled')
+    else:
+        add_button.config(state='normal')
+    
+def check_deletions(*args):
+    global dropdowns_container
+    for child in dropdowns_container.winfo_children():
+        if isinstance(child, tk.OptionMenu):
+            var = child.cget("textvariable")
+            value = child.getvar(var)
+            if value == "- Entfernen":
+                child.destroy()
+    
+
+def update_pattern_collection_menu():
+    global bottom_extra_right_frame, dropdowns_container, add_button, pattern_collection_var
+    clear_screen(bottom_extra_right_frame)
+
+    # Outer container for the pattern collection
+    collection_frame = tk.LabelFrame(
+        bottom_extra_right_frame,
+        text="Pattern-Abfolge",
+        border=0,
+        font=silkscreen,
+        bg=panels,
+        fg="white",
+        bd=2,
+        relief="groove",
+        labelanchor="n"
+    )
+    collection_frame.pack(fill="both", expand=True, padx=10, pady=5)
+    
+    if pattern_collection_var is None:
+        pattern_collection_var = tk.BooleanVar(value=False)
+
+    pattern_col_frame = tk.Frame(collection_frame, bg=buttons)
+    pattern_col_frame.pack(fill="x", padx=10, pady=5)
+
+    pattern_col_label = tk.Label(pattern_col_frame, text="Pattern-Abfolge aktivieren", bg=buttons, fg="white")
+    pattern_col_label.pack(side="left")
+
+    pattern_collection_entry = tk.Checkbutton(
+        pattern_col_frame,
+        variable=pattern_collection_var,
+        onvalue=True,
+        offvalue=False,
+        bg=buttons,
+        command=lambda:update_collection_mode()
+    )
+    pattern_collection_entry.pack(side="left")
+
+    # Get all saved patterns
+    pattern_names = [file.replace(".json", "").capitalize() for file in os.listdir("patterns")]+["- Entfernen"]
+
+    # Container for the dropdowns (vertical stack)
+    dropdowns_container = tk.Frame(collection_frame, bg=panels)
+    dropdowns_container.pack(fill="both", expand=True)
+
+    # Example: Show 3 dropdowns (you can make this dynamic if needed)
+    num_dropdowns = 1
+    for i in range(num_dropdowns):
+        var = tk.StringVar(value=pattern_names[0] if pattern_names else "Kein Pattern")
+        var.trace_add("write", check_deletions)
+        dropdown = tk.OptionMenu(dropdowns_container, var, *pattern_names)
+        dropdown.config(
+            bg=buttons,
+            fg="white",
+            border=0,
+            borderwidth=0,
+            font=silkscreen,
+            activebackground=buttons,
+            activeforeground="white",
+            highlightbackground=buttons
+        )
+        menu = dropdown["menu"]
+        menu.config(bg=buttons, fg="white", border=0, activebackground=buttons, activeforeground="white")
+        dropdown.pack(fill="x", padx=5, pady=3)
+
+    # "+ Pattern hinzufügen" button at the bottom
+    add_button = tk.Button(
+        collection_frame,
+        text="+ Pattern hinzufügen",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=lambda: add_pattern_to_collection()
+    )
+    add_button.pack(fill="x", padx=10, pady=8)
+
+def update_collection_mode():
+    global pattern_collection_var, playing, current_pattern, current_hit
+    current_hit = 0
+    save_collection("collections/autosave.json")
+    playing = False
+    current_pattern = 0
+    if pattern_collection_var.get():
+        disable_preview()
+    else:
+        save_pattern("patterns/autosave.json")
+        load_pattern("patterns/autosave.json")
+    load_collection("collections/autosave.json")
+
+def add_pattern_to_collection():
+    global dropdowns_container, add_button
+    print(get_patterns_in_collection())
+    pattern_names = [file.replace(".json", "").capitalize() for file in os.listdir("patterns")]+["- Entfernen"]
+    var = tk.StringVar(value=pattern_names[0] if pattern_names else "Kein Pattern")
+    var.trace_add("write", check_deletions)
+    dropdown = tk.OptionMenu(dropdowns_container, var, *pattern_names)
+    dropdown.config(
+        bg=buttons,
+        fg="white",
+        border=0,
+        borderwidth=0,
+        font=silkscreen,
+        activebackground=buttons,
+        activeforeground="white",
+        highlightbackground=buttons
+    )
+    menu = dropdown["menu"]
+    menu.config(bg=buttons, fg="white", border=0, activebackground=buttons, activeforeground="white")
+    dropdown.pack(fill="x", padx=5, pady=3)
+    if len(get_patterns_in_collection()) == MAX_COLLECTION_LENGTH:
+        add_button.config(state='disabled')
+    
+    
+def get_patterns_in_collection():
+    global dropdowns_container
+    patterns = []
+    if dropdowns_container:
+        for child in dropdowns_container.winfo_children():
+            if isinstance(child, tk.OptionMenu):
+                var = child.cget("textvariable")
+                value = child.getvar(var)
+                filename = f"patterns/{value.lower()}.json"
+                if os.path.isfile(filename):
+                    patterns.append(filename)
+    return patterns
 
 def delete_pattern(pattern):
     try:
@@ -300,14 +557,14 @@ highlight_first_beat_hit_entry = None
 
 
 def update_file_menu():
-    global bottom_left_frame, filename_entry, pattern_var
+    global bottom_left_frame, filename_entry, pattern_var, collection_name_entry
     clear_screen(bottom_left_frame)
 
     # Add "File" section
     file_frame = tk.LabelFrame(bottom_left_frame, text="File", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     file_frame.pack(fill="x", padx=10, pady=5)
 
-    text = "My pattern"
+    text = "Mein pattern"
     try:
         text = filename_entry.get()
     except:
@@ -319,14 +576,14 @@ def update_file_menu():
     filename_entry.pack(fill="x", padx=5, pady=5, ipady=5)
 
     # Add save button
-    save_button = tk.Button(file_frame, text="Save", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: save_pattern(f"patterns/{filename_entry.get().lower()}.json"))
+    save_button = tk.Button(file_frame, text="Speichern", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: save_pattern(f"patterns/{filename_entry.get().lower()}.json"))
     save_button.pack(fill="x", padx=10, pady=5)
 
     # Add dropdown for stored patterns
     pattern_names = [file.replace(".json", "").capitalize() for file in os.listdir("patterns")]
     patterns_available = bool(pattern_names)
-    pattern_var = tk.StringVar(value=pattern_var.get() if pattern_var in pattern_names else (pattern_names[0] if patterns_available else "No patterns available"))
-    if pattern_var.get() == "No patterns available":
+    pattern_var = tk.StringVar(value=pattern_var.get() if pattern_var in pattern_names else (pattern_names[0] if patterns_available else "Kein Pattern verfügbar"))
+    if pattern_var.get() == "Kein pattern verfügbar":
         pattern_dropdown = tk.OptionMenu(file_frame, pattern_var, *pattern_names, value=pattern_var.get())
     else:
         pattern_dropdown = tk.OptionMenu(file_frame, pattern_var, *pattern_names)
@@ -337,14 +594,14 @@ def update_file_menu():
 
     # Add load and delete buttons for patterns
     if patterns_available:
-        load_button = tk.Button(file_frame, text="Load", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: load_pattern(f"patterns/{pattern_var.get().lower()}.json"))
+        load_button = tk.Button(file_frame, text="Laden", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: load_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         load_button.pack(fill="x", padx=10, pady=5)
 
-        delete_button = tk.Button(file_frame, text="Delete", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
+        delete_button = tk.Button(file_frame, text="Löschen", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         delete_button.pack(fill="x", padx=10, pady=5)
     
     # Add new button
-    new_button = tk.Button(file_frame, text="New Pattern", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: new_pattern())
+    new_button = tk.Button(file_frame, text="Neues Pattern", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: new_pattern())
     new_button.pack(fill="x", padx=10, pady=5)
 
     # Add "Kits" section
@@ -361,8 +618,99 @@ def update_file_menu():
     kit_dropdown.pack(fill="x", padx=10, pady=5)
 
     # Add load button for kits
-    load_button = tk.Button(kit_frame, text="Load", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: load_kit(kit_var.get()))
+    load_button = tk.Button(kit_frame, text="Kit laden", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: load_kit(kit_var.get()))
     load_button.pack(fill="x", padx=10, pady=5)
+
+    # Pattern Collection Management Section
+    collection_mgmt_frame = tk.LabelFrame(
+        bottom_left_frame,
+        text="Pattern-Abfolgen",
+        border=0,
+        font=silkscreen,
+        bg=panels,
+        fg="white",
+        bd=2,
+        relief="groove",
+        labelanchor="n"
+    )
+    collection_mgmt_frame.pack(fill="x", padx=10, pady=5)
+
+    # Entry for collection name
+    collection_name_entry = tk.Entry(
+        collection_mgmt_frame,
+        bg=buttons,
+        border=0,
+        font=silkscreen,
+        fg="white",
+        justify="center"
+    )
+    collection_name_entry.insert(0, "Meine Abfolge")
+    collection_name_entry.pack(fill="x", padx=5, pady=5, ipady=5)
+
+    # Save collection button
+    save_collection_button = tk.Button(
+        collection_mgmt_frame,
+        text="Abfolge speichern",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=lambda: save_collection(f"collections/{collection_name_entry.get()}.json")  # Replace with your save logic
+    )
+    save_collection_button.pack(fill="x", padx=10, pady=5)
+
+    # List available collections
+    collections = []
+    if os.path.isdir("collections"):
+        for file in os.listdir("collections"):
+            if file.endswith(".json"):
+                collections.append(file.replace(".json", "").capitalize())
+
+    collections_var = tk.StringVar(value="Keine Abfolge")
+    if collections:
+        collections_var = tk.StringVar(value=collections[0])
+
+        
+
+    collections_dropdown = tk.OptionMenu(collection_mgmt_frame, collections_var, *collections)
+    collections_dropdown.config(
+        bg=buttons,
+        fg="white",
+        border=0,
+        borderwidth=0,
+        font=silkscreen,
+        activebackground=buttons,
+        activeforeground="white",
+        highlightbackground=buttons
+    )
+    menu = collections_dropdown["menu"]
+    menu.config(bg=buttons, fg="white", border=0, activebackground=buttons, activeforeground="white")
+    collections_dropdown.pack(fill="x", padx=10, pady=5)
+
+    # Load collection button
+    load_collection_button = tk.Button(
+        collection_mgmt_frame,
+        text="Abfolge laden",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=lambda: load_collection(f"collections/{collections_var.get()}.json")  # Replace with your load logic
+    )
+    load_collection_button.pack(fill="x", padx=10, pady=5)
+
+    # Delete collection button
+    delete_collection_button = tk.Button(
+        collection_mgmt_frame,
+        text="Abfolge löschen",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=lambda: print(f"Delete collection: {collections_var.get()}")  # Replace with your delete logic
+    )
+    delete_collection_button.pack(fill="x", padx=10, pady=5)
+    
 
 play_button = None
 
@@ -412,7 +760,7 @@ def update_playback_menu():
             bpm_entry.insert(0, str(bpm))
             
 
-    update_bpm_button = tk.Button(bpm_frame, text="Update BPM", bg=buttons, border=0, fg="white", font=silkscreen, command=update_bpm)
+    update_bpm_button = tk.Button(bpm_frame, text="BPM setzen", bg=buttons, border=0, fg="white", font=silkscreen, command=update_bpm)
     update_bpm_button.pack(fill="x", padx=10, pady=5)
 
 def update_pattern_menu():
@@ -454,7 +802,7 @@ def update_pattern_menu():
             hits_entry.insert(0, str(pattern_beats))
 
     # Add button to update hits
-    update_hits_button = tk.Button(timing_frame, text="Update Hits", bg=buttons, border=0, fg="white", font=silkscreen, command=update_hits)
+    update_hits_button = tk.Button(timing_frame, text="Schläge aktualisiseren", bg=buttons, border=0, fg="white", font=silkscreen, command=update_hits)
     update_hits_button.pack(fill="x", padx=10, pady=5)
     
     beat_length_entry = tk.Entry(timing_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
@@ -474,7 +822,7 @@ def update_pattern_menu():
             beat_length_entry.delete(0, tk.END)
             beat_length_entry.insert(0, str(beat_length))
             
-    update_bpm_button = tk.Button(timing_frame, text="Update beat length", bg=buttons, border=0, fg="white", font=silkscreen, command=update_beat_length)
+    update_bpm_button = tk.Button(timing_frame, text="Taktlänge setzen", bg=buttons, border=0, fg="white", font=silkscreen, command=update_beat_length)
     update_bpm_button.pack(fill="x", padx=10, pady=5)    
     
     if highlight_first_beat_hit is None:
@@ -483,7 +831,7 @@ def update_pattern_menu():
     highlight_frame = tk.Frame(timing_frame, bg=buttons)
     highlight_frame.pack(fill="x", padx=10, pady=5)
 
-    highlight_label = tk.Label(highlight_frame, text="Highlight first beat hit", bg=buttons, fg="white")
+    highlight_label = tk.Label(highlight_frame, text="Ersten Schlag im Takt hervorheben", bg=buttons, fg="white")
     highlight_label.pack(side="left")
 
     highlight_first_beat_hit_entry = tk.Checkbutton(
@@ -500,7 +848,7 @@ def update_instrument_menu():
     global bottom_extra_left_frame, instruments, panels, sliders, volumes
     clear_screen(bottom_extra_left_frame)
     
-    instrument_frame = tk.LabelFrame(bottom_extra_left_frame, text="Tracks", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    instrument_frame = tk.LabelFrame(bottom_extra_left_frame, text="Lautstärken", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     instrument_frame.pack(fill="x", padx=10, pady=5)
 
     
@@ -537,7 +885,7 @@ bpm = 80
 current_hit = 0
 
 def tick():
-    global bpm, current_hit, pattern, highligted_col, audio_samples, pattern_beats, volumes, beat_length, highlight_first_beat_hit
+    global bpm, current_hit, pattern, highligted_col, audio_samples, pattern_beats, preview_enabled, volumes, beat_length, highlight_first_beat_hit, pattern_collection_var, current_pattern
     if highlight_first_beat_hit:
         print(highlight_first_beat_hit.get())
     if playing:
@@ -548,15 +896,17 @@ def tick():
             if instr["enabled"]:
                 i_data = instruments[list(instruments.keys())[i]]
                 sample = audio_samples[i_data["name"]]
-                vol = volumes[i_data["name"]].get()/100
+                vol = 100
+                try:
+                    vol = volumes[i_data["name"]].get()/100
+                except:
+                    pass
                 if highlight_first_beat_hit:
                     if highlight_first_beat_hit.get() and current_hit % beat_length != 0:
                         vol /= 2
-                    
-                    
+                                        
                 sample.set_volume(vol)
 
-                    
                 samples.append(sample)
             i += 1
         
@@ -564,15 +914,21 @@ def tick():
             sample.play()
         
         highligted_col = current_hit
-        apply_single_pattern_col(pattern, current_hit)
-        if current_hit > 0:
-            apply_single_pattern_col(pattern, current_hit-1)
-        else:
-            apply_single_pattern_col(pattern, pattern_beats-1)
+        if preview_enabled:
+            apply_single_pattern_col(pattern, current_hit)
+            if current_hit > 0:
+                apply_single_pattern_col(pattern, current_hit-1)
+            else:
+                apply_single_pattern_col(pattern, pattern_beats-1)
             
         
         current_hit += 1
         if current_hit > pattern_beats-1:
+            if pattern_collection_var.get():
+                current_pattern += 1
+                if current_pattern >= len(get_patterns_in_collection()):
+                    current_pattern=0
+                quickload_pattern(get_patterns_in_collection()[current_pattern])
             current_hit = 0
         
         millis = int(60 / bpm * 1000 / beat_length)
@@ -581,11 +937,12 @@ def tick():
         pass
 
 def stop_pattern():
-    global playing, current_hit, pattern, highligted_col
+    global playing, current_hit, pattern, highligted_col, preview_enabled
     t=highligted_col
     highligted_col = 0
-    apply_single_pattern_col(pattern, t)
-    apply_single_pattern_col(pattern, 0)
+    if preview_enabled:
+        apply_single_pattern_col(pattern, t)
+        apply_single_pattern_col(pattern, 0)
     playing = False
     current_hit = 0
     play_image = ImageTk.PhotoImage(file="img/play.png")
@@ -600,6 +957,8 @@ tick()
 # Create the main window
 root = tk.Tk()
 root.title("Synthesizer")
+root.iconphoto(True, tk.PhotoImage(file='img/logo.png'))
+root.iconbitmap('img/logo.ico')
 
 # Load the custom font using Pillow
 silkscreen_path = "fonts/silkscreen.ttf"  # Path to your .ttf file
@@ -610,6 +969,14 @@ silkscreen = font.Font(family="Silkscreen", size=12)
 
 # Ensure the background color of the main window is black
 root.update_idletasks()
+
+# Load samples
+instruments = []
+for file in os.listdir("kits"):
+    data = json.load(open("kits/"+file, "r"))["samples"]
+    for instrument in list(data.keys()):
+        d=data[instrument]
+        audio_samples[d["name"]]=pygame.mixer.Sound("samples/"+d["file"])
 
 # Create the UI
 load_kit("basic")

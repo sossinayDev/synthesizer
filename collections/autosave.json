@@ -1,0 +1,8 @@
+{
+  "name": "Meine Abfolge",
+  "patterns": [
+    "patterns/levin sfx.json",
+    "patterns/tim i.json",
+    "patterns/my pattern.json"
+  ]
+}

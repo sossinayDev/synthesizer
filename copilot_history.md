@@ -322,3 +322,70 @@ root.mainloop()
 * You pass both `event` and `button` to the `on_button_right_click()` function to access button-specific logic.
 
 Let me know if you want this to work with multiple buttons dynamically.
+
+create a container named "Pattern collection" that shows a list of dropdowns, below each other (Contained in another container). Each dropdown should have all saved patterns as options (see update_file_menu()). At the bottom of that list, add a button saying "+ Pattern hinzufügen"
+
+Here’s how you can implement a "Pattern collection" container with a vertical list of dropdowns (each showing all saved patterns), and a button at the bottom labeled "+ Pattern hinzufügen".  
+Add this code to your `update_pattern_collection_menu()` function:
+
+````python
+def update_pattern_collection_menu():
+    global bottom_extra_right_frame
+    clear_screen(bottom_extra_right_frame)
+
+    # Outer container for the pattern collection
+    collection_frame = tk.LabelFrame(
+        bottom_extra_right_frame,
+        text="Pattern collection",
+        border=0,
+        font=silkscreen,
+        bg=panels,
+        fg="white",
+        bd=2,
+        relief="groove",
+        labelanchor="n"
+    )
+    collection_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+    # Get all saved patterns
+    pattern_names = [file.replace(".json", "").capitalize() for file in os.listdir("patterns")]
+
+    # Container for the dropdowns (vertical stack)
+    dropdowns_container = tk.Frame(collection_frame, bg=panels)
+    dropdowns_container.pack(fill="both", expand=True)
+
+    # Example: Show 3 dropdowns (you can make this dynamic if needed)
+    num_dropdowns = 3
+    for i in range(num_dropdowns):
+        var = tk.StringVar(value=pattern_names[0] if pattern_names else "No patterns")
+        dropdown = tk.OptionMenu(dropdowns_container, var, *pattern_names)
+        dropdown.config(
+            bg=buttons,
+            fg="white",
+            border=0,
+            borderwidth=0,
+            font=silkscreen,
+            activebackground=buttons,
+            activeforeground="white",
+            highlightbackground=buttons
+        )
+        menu = dropdown["menu"]
+        menu.config(bg=buttons, fg="white", border=0, activebackground=buttons, activeforeground="white")
+        dropdown.pack(fill="x", padx=5, pady=3)
+
+    # "+ Pattern hinzufügen" button at the bottom
+    add_button = tk.Button(
+        collection_frame,
+        text="+ Pattern hinzufügen",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=lambda: print("Add pattern clicked")  # Replace with your logic
+    )
+    add_button.pack(fill="x", padx=10, pady=8)
+````
+
+This will create a labeled frame with three dropdowns (each showing all saved patterns) stacked vertically, and a button at the bottom.  
+You can adjust `num_dropdowns` or make it dynamic as needed.  
+Replace the `command` in the button with your actual logic for adding a pattern.

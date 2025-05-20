@@ -25,3 +25,12 @@
 - main.py:
     - Der erste hit eines beats kann nun betont werden.
     - Einzelne Instrumente können nun verschiedene Lautstärken haben.
+## 16.05.2025
+- main.py:
+    - Festlegung des Icons
+- Erste Kompilierungsversuche
+## 20.05.2025
+- main.py:
+    - Übersetzung auf Deutsch
+    - Man kann nun Pattern-Abfolgen erstellen, speichern, laden, und abspielen
+    - Die Vorschau und der Editor werden deaktiviert, wenn eine Abfolge gespielt wird.
