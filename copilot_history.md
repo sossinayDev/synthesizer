@@ -389,3 +389,135 @@ def update_pattern_collection_menu():
 This will create a labeled frame with three dropdowns (each showing all saved patterns) stacked vertically, and a button at the bottom.  
 You can adjust `num_dropdowns` or make it dynamic as needed.  
 Replace the `command` in the button with your actual logic for adding a pattern.
+
+
+Create a function with a for loop that iterates through the pattern, adds the sound to the file at the correct spot and exports it at the end.
+Use this base function (Used for playing):
+
+def tick():
+    global bpm, current_hit, pattern, highligted_col, audio_samples, pattern_beats, preview_enabled, volumes, beat_length, highlight_first_beat_hit, pattern_collection_var, current_pattern
+    if highlight_first_beat_hit:
+        print(highlight_first_beat_hit.get())
+    if playing:
+        pygame.mixer.stop()
+        samples = []
+        i = 0
+        for instr in pattern[current_hit]:
+            if instr["enabled"]:
+                i_data = instruments[list(instruments.keys())[i]]
+                sample = audio_samples[i_data["name"]]
+                vol = 100
+                try:
+                    vol = volumes[i_data["name"]].get()/100
+                except:
+                    pass
+                if highlight_first_beat_hit:
+                    if highlight_first_beat_hit.get() and current_hit % beat_length != 0:
+                        vol /= 2
+                                        
+                sample.set_volume(vol)
+
+                samples.append(sample)
+            i += 1
+        
+        for sample in samples:
+            sample.play()
+        
+        highligted_col = current_hit
+        if preview_enabled:
+            apply_single_pattern_col(pattern, current_hit)
+            if current_hit > 0:
+                apply_single_pattern_col(pattern, current_hit-1)
+            else:
+                apply_single_pattern_col(pattern, pattern_beats-1)
+            
+        
+        current_hit += 1
+        if current_hit > pattern_beats-1:
+            if pattern_collection_var.get():
+                current_pattern += 1
+                if current_pattern >= len(get_patterns_in_collection()):
+                    current_pattern=0
+                quickload_pattern(get_patterns_in_collection()[current_pattern])
+            current_hit = 0
+        
+        millis = int(60 / bpm * 1000 / beat_length)
+        root.after(millis, tick)
+    else:
+        pass
+
+
+Thanks for clarifying — you're using `pydub`, and you want a function that takes your `pattern` (from your `tick()` loop logic), iterates through it, layers the appropriate sounds on a timeline, and then **exports a full audio file**.
+
+---
+
+### ✅ Here’s a `render_pattern_to_audio()` function using **`pydub`**:
+
+```python
+from pydub import AudioSegment
+
+def render_pattern_to_audio(pattern, audio_samples, instruments, bpm, beat_length, volumes, highlight_first_beat_hit=None, export_path="output.wav"):
+    """
+    Renders a pattern to an audio file by layering enabled sounds at the correct beat positions.
+
+    Args:
+        pattern (list of list): Pattern of beats and instruments.
+        audio_samples (dict): Dict of AudioSegment samples keyed by instrument name.
+        instruments (dict): Ordered dict-like mapping index -> instrument data.
+        bpm (float): Beats per minute.
+        beat_length (int): Number of steps per beat (e.g., 4 for 16 steps over 4 beats).
+        volumes (dict): Dict of tkinter Scale() or similar volume controls per instrument.
+        highlight_first_beat_hit (tk.BooleanVar, optional): Whether to halve volume on off-beats.
+        export_path (str): Output file path.
+    """
+    step_duration_ms = int((60 / bpm) * 1000 / beat_length)
+    total_steps = len(pattern)
+    track = AudioSegment.silent(duration=step_duration_ms * total_steps)
+
+    for step_index in range(total_steps):
+        step = pattern[step_index]
+        i = 0  # instrument index
+        for instr in step:
+            if instr["enabled"]:
+                instrument_name = list(instruments.keys())[i]
+                audio = audio_samples[instrument_name]
+
+                # Volume logic
+                vol = 1.0
+                try:
+                    vol = volumes[instrument_name].get() / 100
+                except:
+                    pass
+                if highlight_first_beat_hit and highlight_first_beat_hit.get() and step_index % beat_length != 0:
+                    vol /= 2
+
+                # Apply volume and overlay at correct time
+                adjusted_audio = audio - (1 - vol) * 30  # crude dB reduction
+                track = track.overlay(adjusted_audio, position=step_index * step_duration_ms)
+
+            i += 1
+
+    track.export(export_path, format="wav")
+    print(f"Exported to {export_path}")
+```
+
+---
+
+### 📌 Example usage (in your context):
+
+You'd call this when you're **done sequencing** or want to **render a preview/export**:
+
+```python
+render_pattern_to_audio(pattern, audio_samples, instruments, bpm, beat_length, volumes, highlight_first_beat_hit)
+```
+
+---
+
+### 🧠 Notes:
+
+* This assumes `audio_samples[name]` are **`pydub.AudioSegment`** objects, not `pygame.mixer.Sound` — you'll need to load them with `AudioSegment.from_file()`.
+* Adjust `adjusted_audio = audio - ...` if you want more precise volume control.
+
+---
+
+Want help modifying your current loading code to use `pydub` instead of `pygame.mixer` for rendering?

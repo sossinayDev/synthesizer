@@ -7,3 +7,5 @@ A synthesizer.
 - pygame
 - os
 - json
+- pydub
+- subprocess

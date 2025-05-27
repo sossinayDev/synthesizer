@@ -34,3 +34,10 @@
     - Übersetzung auf Deutsch
     - Man kann nun Pattern-Abfolgen erstellen, speichern, laden, und abspielen
     - Die Vorschau und der Editor werden deaktiviert, wenn eine Abfolge gespielt wird.
+## 27.05.2025
+- main.py:
+    - Verschiebung des Abfolgen-Menu unter das Playback-Menu
+    - Pattern-Export:
+        - Exportierung als .mp3
+        - In Ordner "exports"
+        - Automatische Öffnung des Ordners

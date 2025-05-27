@@ -4,8 +4,9 @@ from tkinter import font
 import json
 from PIL import ImageFont, ImageTk
 import pygame
-
 pygame.mixer.init()
+from pydub import AudioSegment
+import subprocess
 
 silkscreen = None
 
@@ -43,6 +44,65 @@ pattern = []
 volumes = {}
 
 
+
+def render_pattern_to_audio(pattern, instruments, bpm, beat_length, volumes, highlight_first_beat_hit=None, export_path="output.wav"):
+    """
+    Renders a pattern to an audio file by layering enabled sounds at the correct beat positions.
+
+    Args:
+        pattern (list of list): Pattern of beats and instruments.
+        instruments (dict): Ordered dict-like mapping index -> instrument data.
+        bpm (float): Beats per minute.
+        beat_length (int): Number of steps per beat (e.g., 4 for 16 steps over 4 beats).
+        volumes (dict): Dict of tkinter Scale() or similar volume controls per instrument.
+        highlight_first_beat_hit (tk.BooleanVar, optional): Whether to halve volume on off-beats.
+        export_path (str): Output file path.
+    """
+    step_duration_ms = int((60 / bpm) * 1000 / beat_length)
+    total_steps = len(pattern)
+    track = AudioSegment.silent(duration=step_duration_ms * total_steps)
+
+    for step_index in range(total_steps):
+        step = pattern[step_index]
+        i = 0  # instrument index
+        for instr in step:
+            if instr["enabled"]:
+                instrument_name = instruments[list(instruments.keys())[i]]["name"]
+                audio_path = "samples/"+instruments[list(instruments.keys())[i]]["file"]
+                print(audio_path)
+                audio = AudioSegment.from_file(audio_path)
+
+
+                # Volume logic
+                vol = 1.0
+                try:
+                    vol = volumes[instrument_name].get() / 100
+                except:
+                    pass
+                if highlight_first_beat_hit and highlight_first_beat_hit.get() and step_index % beat_length != 0:
+                    vol /= 2
+
+                # Apply volume and overlay at correct time
+                adjusted_audio = audio - int((1 - vol) * 10)  # crude dB reduction
+                track = track.overlay(adjusted_audio, position=step_index * step_duration_ms)
+
+            i += 1
+
+    track.export(export_path, format="mp3")
+    print(f"Exported to {export_path}")
+
+def export_pattern():
+    global pattern, instrument, bpm, beat_length, volumes, highlight_first_beat_hit, filename_entry
+    os.makedirs("exports", exist_ok=True)
+    render_pattern_to_audio(pattern, instruments, bpm, beat_length, volumes, highlight_first_beat_hit, f"exports/export-{filename_entry.get().lower().replace(' ','_')}.mp3")
+    # Open the exports folder in Explorer after exporting
+    exports_path = os.path.abspath('exports')
+    if os.name == 'nt':
+        # Windows
+        subprocess.run(f'start explorer "{exports_path}"', shell=True)
+    else:
+        # macOS or Linux
+        subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', exports_path])
 
 def load_settings():
     global settings, active, inactive, background, panels, buttons, col_increase, sliders
@@ -224,12 +284,14 @@ def quickload_pattern(filename):
     
 
 def load_pattern(filename):
-    global pattern, bpm_entry, preview_enabled, bpm, pattern_beats, hits_entry, instruments, volumes, beat_length, highlight_first_beat_hit, beat_length_entry, highlight_first_beat_hit_entry
+    global pattern, bpm_entry, filename_entry, preview_enabled, bpm, pattern_beats, hits_entry, instruments, volumes, beat_length, highlight_first_beat_hit, beat_length_entry, highlight_first_beat_hit_entry
     preview_enabled = True
     data = json.load(open(filename, "r"))
     pattern_beats = data["length"]
     hits_entry.delete(0, tk.END)
     hits_entry.insert(0, str(pattern_beats))
+    filename_entry.delete(0, tk.END)
+    filename_entry.insert(0, str(filename.split("/")[-1].split(".")[0][0].upper()+filename.split("/")[-1].split(".")[0][1:].lower()))
     load_kit(data["kit"])
     pattern = data["pattern"]
     bpm = data["bpm"]
@@ -603,6 +665,10 @@ def update_file_menu():
     # Add new button
     new_button = tk.Button(file_frame, text="Neues Pattern", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: new_pattern())
     new_button.pack(fill="x", padx=10, pady=5)
+    
+    # Add export button
+    export_button = tk.Button(file_frame, text="Als Sounddatei exportieren", bg=buttons, border=0, fg="white", font=silkscreen, command=lambda: export_pattern())
+    export_button.pack(fill="x", padx=10, pady=5)
 
     # Add "Kits" section
     kit_frame = tk.LabelFrame(bottom_left_frame, text="Kits", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
@@ -620,10 +686,62 @@ def update_file_menu():
     # Add load button for kits
     load_button = tk.Button(kit_frame, text="Kit laden", border=0, font=silkscreen, bg=buttons, fg="white", command=lambda: load_kit(kit_var.get()))
     load_button.pack(fill="x", padx=10, pady=5)
+    
 
+play_button = None
+
+def update_playback_menu():
+    global bottom_middle_frame, play_button, bpm, bpm_entry, beat_length, beat_length_entry, collection_name_entry
+    clear_screen(bottom_middle_frame)
+    playback_area = tk.LabelFrame(bottom_middle_frame, text="Playback", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    playback_area.pack(fill="x", padx=10, pady=5)
+    
+    play_image = ImageTk.PhotoImage(file="img/play.png")
+    play_button = tk.Button(playback_area, image=play_image, border=0, bg=buttons, command=lambda: play_pause_pattern())
+    play_button.image = play_image  # Keep a reference to avoid garbage collection
+    play_button.pack(padx=10, pady=5)
+    play_button.config(width=40, height=40)
+    play_button.image = play_image  # Keep a reference to avoid garbage collection
+    
+    stop_image = ImageTk.PhotoImage(file="img/stop.png")
+    stop_button = tk.Button(playback_area, image=stop_image, border=0, bg=buttons, command=lambda: stop_pattern())
+    stop_button.image = stop_image  # Keep a reference to avoid garbage collection
+    stop_button.pack(side="left", padx=5, pady=5)
+    stop_button.config(width=40, height=40)
+    stop_button.image = stop_image  # Keep a reference to avoid garbage collection
+
+    play_button.pack(side="left", padx=5, pady=5)  # Adjust play button to align on the left
+    
+    # Add BPM section
+    bpm_frame = tk.LabelFrame(bottom_middle_frame, text="BPM", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    bpm_frame.pack(fill="x", padx=10, pady=5)
+
+    bpm_entry = tk.Entry(bpm_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
+    bpm_entry.insert(0, str(bpm))
+    bpm_entry.pack(fill="x", padx=5, pady=5, ipady=5)
+
+    def update_bpm():
+        global bpm, bpm_entry
+        try:
+            bpm = int(bpm_entry.get())
+            if bpm < 10:
+                bpm = 10
+            if bpm > 500:
+                bpm = 500
+            bpm_entry.delete(0, tk.END)
+            bpm_entry.insert(0, str(bpm))
+            print(f"BPM updated to {bpm}")
+        except ValueError:
+            bpm_entry.delete(0, tk.END)
+            bpm_entry.insert(0, str(bpm))
+            
+
+    update_bpm_button = tk.Button(bpm_frame, text="BPM setzen", bg=buttons, border=0, fg="white", font=silkscreen, command=update_bpm)
+    update_bpm_button.pack(fill="x", padx=10, pady=5)
+    
     # Pattern Collection Management Section
     collection_mgmt_frame = tk.LabelFrame(
-        bottom_left_frame,
+        bottom_middle_frame,
         text="Pattern-Abfolgen",
         border=0,
         font=silkscreen,
@@ -710,58 +828,6 @@ def update_file_menu():
         command=lambda: print(f"Delete collection: {collections_var.get()}")  # Replace with your delete logic
     )
     delete_collection_button.pack(fill="x", padx=10, pady=5)
-    
-
-play_button = None
-
-def update_playback_menu():
-    global bottom_middle_frame, play_button, bpm, bpm_entry, beat_length, beat_length_entry
-    clear_screen(bottom_middle_frame)
-    playback_area = tk.LabelFrame(bottom_middle_frame, text="Playback", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
-    playback_area.pack(fill="x", padx=10, pady=5)
-    
-    play_image = ImageTk.PhotoImage(file="img/play.png")
-    play_button = tk.Button(playback_area, image=play_image, border=0, bg=buttons, command=lambda: play_pause_pattern())
-    play_button.image = play_image  # Keep a reference to avoid garbage collection
-    play_button.pack(padx=10, pady=5)
-    play_button.config(width=40, height=40)
-    play_button.image = play_image  # Keep a reference to avoid garbage collection
-    
-    stop_image = ImageTk.PhotoImage(file="img/stop.png")
-    stop_button = tk.Button(playback_area, image=stop_image, border=0, bg=buttons, command=lambda: stop_pattern())
-    stop_button.image = stop_image  # Keep a reference to avoid garbage collection
-    stop_button.pack(side="left", padx=5, pady=5)
-    stop_button.config(width=40, height=40)
-    stop_button.image = stop_image  # Keep a reference to avoid garbage collection
-
-    play_button.pack(side="left", padx=5, pady=5)  # Adjust play button to align on the left
-    
-    # Add BPM section
-    bpm_frame = tk.LabelFrame(bottom_middle_frame, text="BPM", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
-    bpm_frame.pack(fill="x", padx=10, pady=5)
-
-    bpm_entry = tk.Entry(bpm_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
-    bpm_entry.insert(0, str(bpm))
-    bpm_entry.pack(fill="x", padx=5, pady=5, ipady=5)
-
-    def update_bpm():
-        global bpm, bpm_entry
-        try:
-            bpm = int(bpm_entry.get())
-            if bpm < 10:
-                bpm = 10
-            if bpm > 500:
-                bpm = 500
-            bpm_entry.delete(0, tk.END)
-            bpm_entry.insert(0, str(bpm))
-            print(f"BPM updated to {bpm}")
-        except ValueError:
-            bpm_entry.delete(0, tk.END)
-            bpm_entry.insert(0, str(bpm))
-            
-
-    update_bpm_button = tk.Button(bpm_frame, text="BPM setzen", bg=buttons, border=0, fg="white", font=silkscreen, command=update_bpm)
-    update_bpm_button.pack(fill="x", padx=10, pady=5)
 
 def update_pattern_menu():
     global bottom_right_frame, pattern_beats, hits_entry, beat_length_entry, beat_length, highlight_first_beat_hit, highlight_first_beat_hit_entry
