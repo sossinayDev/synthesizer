@@ -1,1 +1,293 @@
-{"kit": "Basic", "pattern": [[{"enabled": false}, {"enabled": true}, {"enabled": true}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": false}, {"enabled": true}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": true}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": true}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": false}, {"enabled": true}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": true}, {"enabled": true}, {"enabled": false}, {"enabled": false}], [{"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}, {"enabled": false}]], "bpm": 90, "length": 16, "volumes": {"Hit": 100, "Hat": 100, "Kick": 100, "Snare": 100, "Ride": 100, "hit": 100, "hat": 100, "kick": 100, "snare": 100, "ride": 100}, "beat_length": 4, "highlight_first_beat_hit": true}
+{
+    "kit": "Basic",
+    "pattern": [
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": true
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ],
+        [
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            },
+            {
+                "enabled": false
+            }
+        ]
+    ],
+    "bpm": 90,
+    "length": 16,
+    "volumes": {
+        "Hit": 100,
+        "Hat": 100,
+        "Kick": 100,
+        "Snare": 100,
+        "Ride": 100,
+        "hit": 100,
+        "hat": 100,
+        "kick": 100,
+        "snare": 100,
+        "ride": 100
+    },
+    "beat_length": 4,
+    "highlight_first_beat_hit": true
+}

@@ -1,13 +1,29 @@
-import os
-import tkinter as tk
-from tkinter import font
-import json
-from PIL import ImageFont, ImageTk
-import pygame
-pygame.mixer.init()
-from pydub import AudioSegment
 import subprocess
+import requests
+import random
+import os
+import string
+import json
 
+try:
+    import tkinter as tk
+    from tkinter import font
+    from PIL import ImageFont, ImageTk
+    import pygame
+    from pydub import AudioSegment 
+except ImportError:
+    print("Not all libraries installed, installing now.")
+    subprocess.run("pip install tk", shell=True)
+    subprocess.run("pip install pillow", shell=True)
+    subprocess.run("pip install pygame", shell=True)
+    subprocess.run("pip install pydub", shell=True)
+    import tkinter as tk
+    from tkinter import font
+    from PIL import ImageFont, ImageTk
+    import pygame
+    from pydub import AudioSegment 
+
+pygame.mixer.init()
 silkscreen = None
 
 settings = {}
@@ -115,6 +131,29 @@ def load_settings():
     sliders=settings["theme"]["sliders"]
     col_increase=settings["theme"]["col_increase"]
 load_settings()
+
+def popup(text):
+    if os.name == 'nt':
+        os.system(f'msg %username% "{text}"')
+    else:
+        os.system(f'zenity --info --text="{text}"')
+
+def send_jshare_request(request_type, key=None, value=None, server_url="https://pixelnet.xn--ocaa-iqa.ch/jshare"):
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {"type": request_type}
+    if key is not None:
+        data["key"] = key
+    if value is not None:
+        data["value"] = value
+
+    try:
+        response = requests.post(server_url, json=data, headers=headers)
+        print(response.text)
+        return response.status_code, response.json()
+    except Exception as e:
+        return 500, {"error": str(e)}
 
 
 def clear_screen(frame):
@@ -868,7 +907,7 @@ def update_pattern_menu():
             hits_entry.insert(0, str(pattern_beats))
 
     # Add button to update hits
-    update_hits_button = tk.Button(timing_frame, text="Schläge aktualisiseren", bg=buttons, border=0, fg="white", font=silkscreen, command=update_hits)
+    update_hits_button = tk.Button(timing_frame, text="Schläge aktualisieren", bg=buttons, border=0, fg="white", font=silkscreen, command=update_hits)
     update_hits_button.pack(fill="x", padx=10, pady=5)
     
     beat_length_entry = tk.Entry(timing_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
@@ -908,6 +947,80 @@ def update_pattern_menu():
         bg=buttons
     )
     highlight_first_beat_hit_entry.pack(side="left")
+    
+    share_frame = tk.LabelFrame(bottom_right_frame, text="Pattern teilen", border=0, font=silkscreen, bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    share_frame.pack(fill="x", padx=10, pady=5)
+
+    share_key_entry = tk.Entry(share_frame, bg=buttons, border=0, font=silkscreen, fg="white", justify="center")
+    
+
+    def share_pattern():
+        temp_filename = "patterns/share_temp.json"
+        save_pattern(temp_filename)
+        print("saved")
+        pattern_data = {}
+        with open(temp_filename, "r", encoding="utf-8") as f:
+            pattern_data = f.read()
+        print("read")
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        server_share_code = f"edmsynth-{code}"
+        print(f"Sharing with code {server_share_code}")
+        status, resp = send_jshare_request("set", key=server_share_code, value=pattern_data)
+        print(f"Sent jShare request")
+        print(status, resp)
+        if status == 200:
+            share_key_entry.delete(0, tk.END)
+            share_key_entry.insert(0, code)
+            popup(f"Pattern geteilt! Teilen-Code: {code}")
+        else:
+            popup("Fehler beim Teilen: "+resp.get("error", "Unbekannter Fehler"))
+
+    def load_shared_pattern():
+        key = share_key_entry.get().strip()
+        if not key or key.lower() == "teilen-code":
+            return
+        if not key.startswith("edmsynth-"):
+            key = "edmsynth-" + key
+        status, resp = send_jshare_request("get", key=key)
+        if status == 200 and "value" in resp:
+            try:
+                pattern_json = json.loads(resp["value"])
+                pattern_name = pattern_json.get("name", "shared_loaded")
+                safe_name = pattern_name.lower().replace(" ", "_").replace(".","-").replace("/","-").replace("\\","-")
+                temp_filename = f"patterns/{safe_name}.json"
+                with open(temp_filename, "w", encoding="utf-8") as f:
+                    f.write(resp["value"])
+                load_pattern(temp_filename)
+                popup("Pattern geladen!")
+            except Exception as e:
+                popup("Fehler beim Verarbeiten des geladenen Patterns: "+str(e))
+        else:
+            popup("Fehler beim Laden: "+str(resp.get("error", "Unbekannter Fehler")))
+
+    share_button = tk.Button(
+        share_frame,
+        text="Pattern teilen",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=share_pattern
+    )
+    share_button.pack(fill="x", padx=10, pady=5)
+
+    share_key_entry.pack(fill="x", padx=5, pady=5, ipady=5)
+
+    load_share_button = tk.Button(
+        share_frame,
+        text="Pattern laden",
+        bg=buttons,
+        border=0,
+        fg="white",
+        font=silkscreen,
+        command=load_shared_pattern
+    )
+    load_share_button.pack(fill="x", padx=10, pady=5)
+    
 
 
 def update_instrument_menu():
@@ -955,7 +1068,9 @@ def tick():
     if highlight_first_beat_hit:
         print(highlight_first_beat_hit.get())
     if playing:
-        pygame.mixer.stop()
+        millis = int(60 / bpm * 1000 / beat_length)
+        if millis < 100 or current_kit_name == "Sfx":
+            pygame.mixer.stop()
         samples = []
         i = 0
         for instr in pattern[current_hit]:
@@ -997,7 +1112,7 @@ def tick():
                 quickload_pattern(get_patterns_in_collection()[current_pattern])
             current_hit = 0
         
-        millis = int(60 / bpm * 1000 / beat_length)
+        
         root.after(millis, tick)
     else:
         pass
