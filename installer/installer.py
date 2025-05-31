@@ -8,6 +8,7 @@ subprocess.run("pip install tk", shell=True)
 subprocess.run("pip install pillow", shell=True)
 subprocess.run("pip install pygame", shell=True)
 subprocess.run("pip install pydub", shell=True)
+subprocess.run("pip install requests", shell=True)
 
 url = "https://pixelnet.xn--ocaa-iqa.ch/static/project_data/synthesizer.zip"
 zip_path = "synthesizer.zip"

@@ -1,5 +1,4 @@
 import subprocess
-import requests
 import random
 import os
 import string
@@ -11,16 +10,19 @@ try:
     from PIL import ImageFont, ImageTk
     import pygame
     from pydub import AudioSegment 
+    import requests
 except ImportError:
     print("Not all libraries installed, installing now.")
     subprocess.run("pip install tk", shell=True)
     subprocess.run("pip install pillow", shell=True)
     subprocess.run("pip install pygame", shell=True)
     subprocess.run("pip install pydub", shell=True)
+    subprocess.run("pip install requests", shell=True)
     import tkinter as tk
     from tkinter import font
     from PIL import ImageFont, ImageTk
     import pygame
+    import requests
     from pydub import AudioSegment 
 
 pygame.mixer.init()
