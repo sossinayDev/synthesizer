@@ -13,6 +13,8 @@
 - Pattern-Abfolgen
 - Hervorhebung des ersten Schlags
 - Einzelne Lautstärken für jede Spur
+- Patterns schnell über das Internet teilen
+- Einfache installation
 
 ## Datenstruktur
 ### Kits
@@ -146,7 +148,11 @@ Pattern-Abfolgen sind relativ simpel aufgebaut. Sie werden als JSON im Unterordn
             - Das Kit "Sfx" geladen wurde
     - Automatische Installation von Bibliotheken
         - Wenn mindestens eine Zusatzbibliotheke fehlt, wird sie mit pip installiert.
+    - Bugfix:
+        - Das Programm konnte nicht ausgeführt werden, wenn keine Patterns existierten.
 - working_history.md wurde zu devlog.md umbenannt.
+- Ein einfaches Installationsprogramm wurde erstellt.
+    - Python oder .exe verfügbar
 
 ## ChatGPT-/ Copilot-konversationen
 Siehe [copilot_history.md](copilot_history.md)

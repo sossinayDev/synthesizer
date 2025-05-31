@@ -1,8 +1,0 @@
-{
-  "name": "Levin + Tim + Rapid",
-  "patterns": [
-    "patterns/levin sfx.json",
-    "patterns/tim i.json",
-    "patterns/my pattern.json"
-  ]
-}
