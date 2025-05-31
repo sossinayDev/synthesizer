@@ -24,3 +24,6 @@
 ## 12.05.2025
 - main.py:
     - Einzelne Instrumente können nun verschiedene Lautstärken haben.
+- Neue Samples
+- Neues Kit (Percussion) mit neuen Samples erstellt.    
+- Testen der Funktionen des derzeitigen Programms.
