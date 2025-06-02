@@ -62,7 +62,7 @@ volumes = {}
 
 
 
-def render_pattern_to_audio(pattern, instruments, bpm, beat_length, volumes, highlight_first_beat_hit=None, export_path="output.wav"):
+def render_pattern_to_audio(pattern, instruments, bpm, beat_length, volumes, highlight_first_beat_hit=None, export_path="output.mp3"):
     """
     Renders a pattern to an audio file by layering enabled sounds at the correct beat positions.
 
@@ -989,7 +989,7 @@ def update_pattern_menu():
             popup("Fehler beim Teilen: "+resp.get("error", "Unbekannter Fehler"))
 
     def load_shared_pattern():
-        key = share_key_entry.get().strip()
+        key = share_key_entry.get().strip().upper()
         if not key or key.lower() == "teilen-code":
             return
         if not key.startswith("edmsynth-"):
