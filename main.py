@@ -1150,7 +1150,7 @@ tick()
 
 # Create the main window
 root = tk.Tk()
-root.title("Synthesizer")
+root.title("iDrum")
 root.iconphoto(True, tk.PhotoImage(file='img/logo.png'))
 root.iconbitmap('img/logo.ico')
 
