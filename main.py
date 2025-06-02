@@ -134,11 +134,16 @@ def load_settings():
 load_settings()
 
 def popup(text):
-    if os.name == 'nt':
-        os.system(f'msg %username% "{text}"')
-    else:
-        os.system(f'zenity --info --text="{text}"')
-
+    try:
+        if os.name == 'nt':
+            os.system(f'msg %username% "{text}"')
+        else:
+            os.system(f'zenity --info --text="{text}"')
+    except Exception as e:
+        print(f"Popup failed: {e}\nPopup content: {text}")
+        print("You can try to install zenity on your system to enable popups.")
+        print("For Linux, you can install zenity with 'sudo apt install zenity' or similar commands depending on your distribution.")
+    
 def send_jshare_request(request_type, key=None, value=None, server_url="https://pixelnet.xn--ocaa-iqa.ch/jshare"):
     headers = {
         "Content-Type": "application/json"
