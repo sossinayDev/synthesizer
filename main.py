@@ -43,6 +43,7 @@ background = "#000000"
 panels= "#333333"
 buttons= "#aaaaaa"
 sliders= "#101020"
+warn = "#cc2222"
 col_increase = 50
 
 MAX_COLLECTION_LENGTH = 10
@@ -674,7 +675,7 @@ def update_file_menu():
     clear_screen(bottom_left_frame)
 
     # Add "File" section
-    file_frame = tk.LabelFrame(bottom_left_frame, text="File", border=0,  bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    file_frame = tk.LabelFrame(bottom_left_frame, text="Datei", border=0,  bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     file_frame.pack(fill="x", padx=10, pady=5)
 
     text = "Mein pattern"
@@ -689,8 +690,12 @@ def update_file_menu():
     filename_entry.pack(fill="x", padx=5, pady=5, ipady=5)
 
     # Add save button
-    save_button = tk.Button(file_frame, text="Speichern", bg=buttons, border=0, fg="white",  command=lambda: save_pattern(f"patterns/{filename_entry.get().lower()}.json"))
+    save_button = tk.Button(file_frame, text="Speichern", bg=buttons, border=0, fg="white",  command=lambda: save_pattern(f"patterns/{filename_entry.get().lower().replace('.','-').replace('/','-').replace(' ','_')}.json"))
     save_button.pack(fill="x", padx=10, pady=5)
+
+    # Add label for pattern selection
+    pattern_select_label = tk.Label(file_frame, text="Pattern auswählen:", bg=panels, fg="white")
+    pattern_select_label.pack(fill="x", padx=10, pady=(10, 0))
 
     # Add dropdown for stored patterns
     if not os.path.isdir("patterns"):
@@ -713,16 +718,16 @@ def update_file_menu():
         load_button = tk.Button(file_frame, text="Laden", border=0,  bg=buttons, fg="white", command=lambda: load_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         load_button.pack(fill="x", padx=10, pady=5)
 
-        delete_button = tk.Button(file_frame, text="Löschen", border=0,  bg=buttons, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
+        delete_button = tk.Button(file_frame, text="Löschen", border=0,  bg=warn, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         delete_button.pack(fill="x", padx=10, pady=5)
-    
-    # Add new button
-    new_button = tk.Button(file_frame, text="Neues Pattern", bg=buttons, border=0, fg="white",  command=lambda: new_pattern())
-    new_button.pack(fill="x", padx=10, pady=5)
     
     # Add export button
     export_button = tk.Button(file_frame, text="Als Sounddatei exportieren", bg=buttons, border=0, fg="white",  command=lambda: export_pattern())
     export_button.pack(fill="x", padx=10, pady=5)
+    
+    # Add new button
+    new_button = tk.Button(file_frame, text="Neues Pattern", bg=buttons, border=0, fg="white",  command=lambda: new_pattern())
+    new_button.pack(fill="x", padx=10, pady=5)    
 
     # Add "Kits" section
     kit_frame = tk.LabelFrame(bottom_left_frame, text="Kits", border=0,  bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
@@ -829,7 +834,7 @@ def update_playback_menu():
         border=0,
         fg="white",
         
-        command=lambda: save_collection(f"collections/{collection_name_entry.get()}.json")  # Replace with your save logic
+        command=lambda: save_collection(f"collections/{collection_name_entry.get().lower().replace('.','-').replace('/','-').replace(' ','_')}.json")  # Replace with your save logic
     )
     save_collection_button.pack(fill="x", padx=10, pady=5)
 
