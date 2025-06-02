@@ -12,7 +12,9 @@ subprocess.run("pip install requests", shell=True)
 
 # Install ffmpeg
 ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-ffmpeg_zip_path = os.path.join(os.path.expanduser("~"), "Downloads", "ffmpeg.zip")
+os.makedirs( os.path.join(os.path.expanduser("~"), "Documents"), exist_ok=True)
+open(os.path.join(os.path.expanduser("~"), "Documents", "ffmpeg.zip"), 'w').close()
+ffmpeg_zip_path = os.path.join(os.path.expanduser("~"), "Documents", "ffmpeg.zip")
 ffmpeg_extract_path = os.path.join(os.path.expanduser("~"), "ffmpeg")
 
 # Download ffmpeg zip
