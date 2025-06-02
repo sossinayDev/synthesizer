@@ -1081,7 +1081,7 @@ def tick():
     if highlight_first_beat_hit:
         print(highlight_first_beat_hit.get())
     if playing:
-        millis = int((60 / bpm) * 1000)
+        millis = int((60 / bpm) * 1000 / beat_length)
         if millis < 100 or current_kit_name == "Sfx":
             pygame.mixer.stop()
         samples = []
