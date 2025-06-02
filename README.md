@@ -164,6 +164,15 @@ Pattern-Abfolgen sind relativ simpel aufgebaut. Sie werden als JSON im Unterordn
 - working_history.md wurde zu devlog.md umbenannt.
 - Ein einfaches Installationsprogramm wurde erstellt.
     - Python oder .exe verfügbar
+### 02.06.2025
+    - installer.py:
+        - Automatische Installation von ffmpeg nach Bestätigung
+    - Unbenutzte Patterns gelöscht
+    - devlog.md zu README.md umbenannt
+    - Englische Version des Devlogs hinzugefügt
+    - Neue Installer- und Haupt-EXE-Dateien
+    - Kleine Designänderungen
+    - Diverse Bugfixes
 
 ## ChatGPT-/ Copilot-konversationen
 Siehe [copilot_history.md](copilot_history.md)

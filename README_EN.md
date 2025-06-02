@@ -163,6 +163,16 @@ Pattern sequences are relatively simple. They are saved as JSON in the "collecti
 - working_history.md renamed to devlog.md
 - A simple installer was created
     - Python or .exe available
+### 2025-06-02
+- installer.py
+    - Automatically install ffmpeg after confirmation
+- Deleted unused patterns
+- Renamed devlog.md to README.md
+- English version of devlog
+- New installer and main EXEs
+- Small design changes
+- Diverse bugfixes
+
 
 ## ChatGPT / Copilot Conversations
 See [copilot_history.md](copilot_history.md)
