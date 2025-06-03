@@ -1,0 +1,83 @@
+{
+    "name": "Myinstants kit",
+    "description": "A myinstants meme sfx kit",
+    "samples": {
+        "anime-wow": {
+            "name": "Anime wow",
+            "short": "WOW",
+            "inactive": "#440044",
+            "active": "#aa00aa",
+            "file": "anime-wow-sound-effect.wav"
+        },
+        "apple-pay": {
+            "name": "Apple pay",
+            "short": "PAY",
+            "inactive": "#440000",
+            "active": "#aa0000",
+            "file": "applepay.wav"
+        },
+        "awesome-kick": {
+            "name": "Awesome Kick",
+            "short": "AKI",
+            "inactive": "#440022",
+            "active": "#aa0066",
+            "file": "awesome-kick.wav"
+        },
+        "cinematic-boom": {
+            "name": "Cinematic boom",
+            "short": "CBM",
+            "inactive": "#220044",
+            "active": "#6600aa",
+            "file": "cinematic-boom.wav"
+        },
+        "fart": {
+            "name": "Fart",
+            "short": "FRT",
+            "inactive": "#004400",
+            "active": "#33ff00",
+            "file": "fart-with-reverb.wav"
+        },
+        "apple-notification": {
+            "name": "Apple notification",
+            "short": "ANT",
+            "inactive": "#224400",
+            "active": "#aa9900",
+            "file": "apple-notification.wav"
+        },
+        "punch": {
+            "name": "Punch",
+            "short": "PUN",
+            "inactive": "#444400",
+            "active": "#aaaa00",
+            "file": "punch.wav"
+        },
+        "rizz": {
+            "name": "Rizz",
+            "short": "RZZ",
+            "inactive": "#444444",
+            "active": "#aaaaaa",
+            "file": "rizz-sound.wav"
+        },
+        "screenshot": {
+            "name": "Screenshot",
+            "short": "SCR",
+            "inactive": "#000044",
+            "active": "#0000aa",
+            "file": "screenshot.wav"
+        },
+        "vine_boom": {
+            "name": "Vine boom",
+            "short": "VBM",
+            "inactive": "#004444",
+            "active": "#00aaaa",
+            "file": "vine-boom.wav"
+        },
+        "wrong": {
+            "name": "Wrong Buzzer",
+            "short": "WRG",
+            "inactive": "#004422",
+            "active": "#00aa99",
+            "file": "wrong-answer-sound.wav"
+        }
+    }
+}

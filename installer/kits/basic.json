@@ -1,0 +1,41 @@
+{
+    "name": "Basic kit",
+    "description": "A basic drum kit",
+    "samples": {
+        "hit": {
+            "name": "Hit",
+            "short": "HIT",
+            "inactive": "#332200",
+            "active": "#bb7a00",
+            "file": "hit.wav"
+        },
+        "hat": {
+            "name": "Hat",
+            "short": "HAT",
+            "inactive": "#333300",
+            "active": "#bbbb00",
+            "file": "hat.wav"
+        },
+        "kick": {
+            "name": "Kick",
+            "short": "KCK",
+            "inactive": "#223300",
+            "active": "#77bb00",
+            "file": "kick.wav"
+        },
+        "snare": {
+            "name": "Snare",
+            "short": "SNR",
+            "inactive": "#003322",
+            "active": "#00bb77",
+            "file": "snare.wav"
+        },
+        "ride": {
+            "name": "Ride",
+            "short": "RDE",
+            "inactive": "#002233",
+            "active": "#0077bb",
+            "file": "ride.wav"
+        }
+    }
+}

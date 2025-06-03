@@ -1,0 +1,82 @@
+{   "name": "80s Drum Machine",
+    "description": "A classic 80s drum machine kit",
+    "samples": {
+        "Drum": {
+            "name": "Drum",
+            "short": "DRM",
+            "inactive": "#332200",
+            "active": "#bb7a00",
+            "file": "80s-Bdrum1.wav"
+        },
+        "Cowbell": {
+            "name": "Cowbell",
+            "short": "CWB",
+            "inactive": "#333300",
+            "active": "#bbbb00",
+            "file": "80s-COWBELL1.wav"
+        },
+        "Crash 1": {
+            "name": "Crash 1",
+            "short": "CR1",
+            "inactive": "#223300",
+            "active": "#77bb00",
+            "file": "80s-CRASH1.wav"
+        },
+        "Crash 2": {
+            "name": "Crash 2",
+            "short": "CR2",
+            "inactive": "#003322",
+            "active": "#00bb77",
+            "file": "80s-CRASH3.wav"
+        },
+        "Hi-HatC1": {
+            "name": "Hi-Hat",
+            "short": "HAT",
+            "inactive": "#002233",
+            "active": "#0077bb",
+            "file": "80s-HHCLOSE1.wav"
+        },
+        "HCONGA": {
+            "name": "Conga",
+            "short": "CNA",
+            "inactive": "#001122",
+            "active": "#0055aa",
+            "file": "80s-HICONGA.wav"
+        },
+        "LCONGA": {
+            "name": "Conga Low",
+            "short": "CNAL",
+            "inactive": "#110022",
+            "active": "#550055",
+            "file": "80s-LOWCONGA.wav"
+        },
+        "SNARE": {
+            "name": "Snare",
+            "short": "SNR",
+            "inactive": "#220011",
+            "active": "#770055",
+            "file": "80s-SNARE1.wav"
+        },
+        "TAMBURIN": {
+            "name": "Tamburin",
+            "short": "TMB",
+            "inactive": "#331100",
+            "active": "#aa5500",
+            "file": "80s-TAMB1.wav"
+        },
+        "TOM1": {
+            "name": "Tom 1",
+            "short": "TOM1",
+            "inactive": "#442200",
+            "active": "#bb7700",
+            "file": "80s-TOM1.wav"
+        },
+        "TOM2": {
+            "name": "Tom 2",
+            "short": "TOM2",
+            "inactive": "#553300",
+            "active": "#cc8800",
+            "file": "80s-TOM3.wav"
+        }
+    }
+}
