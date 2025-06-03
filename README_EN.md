@@ -172,7 +172,13 @@ Pattern sequences are relatively simple. They are saved as JSON in the "collecti
 - New installer and main EXEs
 - Small design changes
 - Diverse bugfixes
-
+### 2025-06-03
+- New drum kit (80s Drum Machine)
+- New sounds:
+    - 80s Drum
+    - 80s Cowbell
+    - 80s Conga
+    - And more
 
 ## ChatGPT / Copilot Conversations
 See [copilot_history.md](copilot_history.md)

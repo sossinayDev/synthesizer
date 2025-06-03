@@ -165,14 +165,21 @@ Pattern-Abfolgen sind relativ simpel aufgebaut. Sie werden als JSON im Unterordn
 - Ein einfaches Installationsprogramm wurde erstellt.
     - Python oder .exe verfügbar
 ### 02.06.2025
-    - installer.py:
-        - Automatische Installation von ffmpeg nach Bestätigung
-    - Unbenutzte Patterns gelöscht
-    - devlog.md zu README.md umbenannt
-    - Englische Version des Devlogs hinzugefügt
-    - Neue Installer- und Haupt-EXE-Dateien
-    - Kleine Designänderungen
-    - Diverse Bugfixes
+- installer.py:
+    - Automatische Installation von ffmpeg nach Bestätigung
+- Unbenutzte Patterns gelöscht
+- devlog.md zu README.md umbenannt
+- Englische Version des Devlogs hinzugefügt
+- Neue Installer- und Haupt-EXE-Dateien
+- Kleine Designänderungen
+- Diverse Bugfixes
+### 03.06.2025
+- Neues Drum Kit (80s Drum Machine)
+- Neue Sounds
+    -> 80s Drum
+    -> 80s Cowbell
+    -> 80s Conga
+    Und mehr
 
 ## ChatGPT-/ Copilot-konversationen
 Siehe [copilot_history.md](copilot_history.md)
