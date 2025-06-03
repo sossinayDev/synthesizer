@@ -43,6 +43,7 @@ background = "#000000"
 panels= "#333333"
 buttons= "#aaaaaa"
 sliders= "#101020"
+warn = "#cc2222"
 col_increase = 50
 
 MAX_COLLECTION_LENGTH = 10
@@ -134,11 +135,16 @@ def load_settings():
 load_settings()
 
 def popup(text):
-    if os.name == 'nt':
-        os.system(f'msg %username% "{text}"')
-    else:
-        os.system(f'zenity --info --text="{text}"')
-
+    try:
+        if os.name == 'nt':
+            os.system(f'msg %username% "{text}"')
+        else:
+            os.system(f'zenity --info --text="{text}"')
+    except Exception as e:
+        print(f"Popup failed: {e}\nPopup content: {text}")
+        print("You can try to install zenity on your system to enable popups.")
+        print("For Linux, you can install zenity with 'sudo apt install zenity' or similar commands depending on your distribution.")
+    
 def send_jshare_request(request_type, key=None, value=None, server_url="https://pixelnet.xn--ocaa-iqa.ch/jshare"):
     headers = {
         "Content-Type": "application/json"
@@ -669,7 +675,7 @@ def update_file_menu():
     clear_screen(bottom_left_frame)
 
     # Add "File" section
-    file_frame = tk.LabelFrame(bottom_left_frame, text="File", border=0,  bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
+    file_frame = tk.LabelFrame(bottom_left_frame, text="Datei", border=0,  bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
     file_frame.pack(fill="x", padx=10, pady=5)
 
     text = "Mein pattern"
@@ -684,8 +690,12 @@ def update_file_menu():
     filename_entry.pack(fill="x", padx=5, pady=5, ipady=5)
 
     # Add save button
-    save_button = tk.Button(file_frame, text="Speichern", bg=buttons, border=0, fg="white",  command=lambda: save_pattern(f"patterns/{filename_entry.get().lower()}.json"))
+    save_button = tk.Button(file_frame, text="Speichern", bg=buttons, border=0, fg="white",  command=lambda: save_pattern(f"patterns/{filename_entry.get().lower().replace('.','-').replace('/','-').replace(' ','_')}.json"))
     save_button.pack(fill="x", padx=10, pady=5)
+
+    # Add label for pattern selection
+    pattern_select_label = tk.Label(file_frame, text="Pattern auswählen:", bg=panels, fg="white")
+    pattern_select_label.pack(fill="x", padx=10, pady=(10, 0))
 
     # Add dropdown for stored patterns
     if not os.path.isdir("patterns"):
@@ -708,16 +718,16 @@ def update_file_menu():
         load_button = tk.Button(file_frame, text="Laden", border=0,  bg=buttons, fg="white", command=lambda: load_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         load_button.pack(fill="x", padx=10, pady=5)
 
-        delete_button = tk.Button(file_frame, text="Löschen", border=0,  bg=buttons, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
+        delete_button = tk.Button(file_frame, text="Löschen", border=0,  bg=warn, fg="white", command=lambda: delete_pattern(f"patterns/{pattern_var.get().lower()}.json"))
         delete_button.pack(fill="x", padx=10, pady=5)
-    
-    # Add new button
-    new_button = tk.Button(file_frame, text="Neues Pattern", bg=buttons, border=0, fg="white",  command=lambda: new_pattern())
-    new_button.pack(fill="x", padx=10, pady=5)
     
     # Add export button
     export_button = tk.Button(file_frame, text="Als Sounddatei exportieren", bg=buttons, border=0, fg="white",  command=lambda: export_pattern())
     export_button.pack(fill="x", padx=10, pady=5)
+    
+    # Add new button
+    new_button = tk.Button(file_frame, text="Neues Pattern", bg=buttons, border=0, fg="white",  command=lambda: new_pattern())
+    new_button.pack(fill="x", padx=10, pady=5)    
 
     # Add "Kits" section
     kit_frame = tk.LabelFrame(bottom_left_frame, text="Kits", border=0,  bg=panels, fg="white", bd=2, relief="groove", labelanchor="n")
@@ -824,7 +834,7 @@ def update_playback_menu():
         border=0,
         fg="white",
         
-        command=lambda: save_collection(f"collections/{collection_name_entry.get()}.json")  # Replace with your save logic
+        command=lambda: save_collection(f"collections/{collection_name_entry.get().lower().replace('.','-').replace('/','-').replace(' ','_')}.json")  # Replace with your save logic
     )
     save_collection_button.pack(fill="x", padx=10, pady=5)
 
@@ -1081,7 +1091,7 @@ def tick():
     if highlight_first_beat_hit:
         print(highlight_first_beat_hit.get())
     if playing:
-        millis = int(60 / bpm * 1000 / beat_length)
+        millis = int((60 / bpm) * 1000 / beat_length)
         if millis < 100 or current_kit_name == "Sfx":
             pygame.mixer.stop()
         samples = []
@@ -1150,7 +1160,7 @@ tick()
 
 # Create the main window
 root = tk.Tk()
-root.title("Synthesizer")
+root.title("iDrum")
 root.iconphoto(True, tk.PhotoImage(file='img/logo.png'))
 root.iconbitmap('img/logo.ico')
 

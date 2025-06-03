@@ -11,27 +11,38 @@ subprocess.run("pip install pydub", shell=True)
 subprocess.run("pip install requests", shell=True)
 
 # Install ffmpeg
-ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-os.makedirs( os.path.join(os.path.expanduser("~"), "Documents"), exist_ok=True)
-open(os.path.join(os.path.expanduser("~"), "Documents", "ffmpeg.zip"), 'w').close()
-ffmpeg_zip_path = os.path.join(os.path.expanduser("~"), "Documents", "ffmpeg.zip")
-ffmpeg_extract_path = os.path.join(os.path.expanduser("~"), "ffmpeg")
+ffmpeg_installed = False
+try:
+    subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+    ffmpeg_installed = True
+except Exception:
+    ffmpeg_installed = False
+    
+if not ffmpeg_installed:
+    ans = input("FFmpeg is required but not installed. Do you want to install it? (y/n): ").strip().lower()
+    if ans == "y" or ans == "yes":
+        print("Installing FFmpeg...")
+        ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+        os.makedirs( os.path.join(os.path.expanduser("~"), "Documents"), exist_ok=True)
+        open(os.path.join(os.path.expanduser("~"), "Documents", "ffmpeg.zip"), 'w').close()
+        ffmpeg_zip_path = os.path.join(os.path.expanduser("~"), "Documents", "ffmpeg.zip")
+        ffmpeg_extract_path = os.path.join(os.path.expanduser("~"), "ffmpeg")
 
-# Download ffmpeg zip
-urllib.request.urlretrieve(ffmpeg_url, ffmpeg_zip_path)
+        # Download ffmpeg zip
+        urllib.request.urlretrieve(ffmpeg_url, ffmpeg_zip_path)
 
-# Extract ffmpeg zip
-with zipfile.ZipFile(ffmpeg_zip_path, 'r') as zip_ref:
-    zip_ref.extractall(ffmpeg_extract_path)
+        # Extract ffmpeg zip
+        with zipfile.ZipFile(ffmpeg_zip_path, 'r') as zip_ref:
+            zip_ref.extractall(ffmpeg_extract_path)
 
-# Find the extracted ffmpeg bin directory
-ffmpeg_dirs = [d for d in os.listdir(ffmpeg_extract_path) if os.path.isdir(os.path.join(ffmpeg_extract_path, d))]
-if ffmpeg_dirs:
-    ffmpeg_bin = os.path.join(ffmpeg_extract_path, ffmpeg_dirs[0], "bin")
-    os.environ["PATH"] += os.pathsep + ffmpeg_bin
+        # Find the extracted ffmpeg bin directory
+        ffmpeg_dirs = [d for d in os.listdir(ffmpeg_extract_path) if os.path.isdir(os.path.join(ffmpeg_extract_path, d))]
+        if ffmpeg_dirs:
+            ffmpeg_bin = os.path.join(ffmpeg_extract_path, ffmpeg_dirs[0], "bin")
+            os.environ["PATH"] += os.pathsep + ffmpeg_bin
 
-# Remove ffmpeg zip after extraction
-os.remove(ffmpeg_zip_path)
+        # Remove ffmpeg zip after extraction
+        os.remove(ffmpeg_zip_path)
 
 # Download project files
 
