@@ -3,6 +3,15 @@ import subprocess
 import zipfile
 import urllib.request
 
+# Check if pip is installed
+try:
+    subprocess.run(["pip", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+except Exception:
+    print("pip is not installed. Please install pip/python before running this script.")
+    input("Press Enter to open store")
+    subprocess.run("start https://apps.microsoft.com/detail/9pnrbtzxmb4z?hl=de-DE&gl=CH", shell=True)
+    exit(1)
+
 # Install libraries
 subprocess.run("pip install tk", shell=True)
 subprocess.run("pip install pillow", shell=True)
