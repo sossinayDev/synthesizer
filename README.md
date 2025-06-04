@@ -146,7 +146,7 @@ Pattern-Abfolgen sind relativ simpel aufgebaut. Sie werden als JSON im Unterordn
         - Exportierung als .mp3
         - In Ordner "exports"
         - Automatische Öffnung des Ordners
-*Für weitere Informationen über Änderungen, sieh dir die [Änderungsliste](https://github.com/sossinayDev/synthesizer/activity?ref=main) an*
+
 ### 31.05.2025
 - main.py:
     - Schnelles Teilen über Internet (Eigener server)
@@ -180,6 +180,8 @@ Pattern-Abfolgen sind relativ simpel aufgebaut. Sie werden als JSON im Unterordn
     -> 80s Cowbell
     -> 80s Conga
     Und mehr
+
+*Für weitere Informationen über Änderungen, sieh dir die [Änderungsliste](https://github.com/sossinayDev/synthesizer/activity?ref=main) an*
 
 ## ChatGPT-/ Copilot-konversationen
 Siehe [copilot_history.md](copilot_history.md)
