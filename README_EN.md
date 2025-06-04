@@ -145,7 +145,7 @@ Pattern sequences are relatively simple. They are saved as JSON in the "collecti
         - Export as .mp3
         - To "exports" folder
         - Automatically opens the folder
-*For more information about changes, see the [changelog](https://github.com/sossinayDev/synthesizer/activity?ref=main)*
+
 ### 2025-05-31
 - main.py:
     - Quick sharing over the internet (own server)
@@ -179,6 +179,8 @@ Pattern sequences are relatively simple. They are saved as JSON in the "collecti
     - 80s Cowbell
     - 80s Conga
     - And more
+
+*For more information about changes, see the [changelog](https://github.com/sossinayDev/synthesizer/activity?ref=main)*
 
 ## ChatGPT / Copilot Conversations
 See [copilot_history.md](copilot_history.md)
